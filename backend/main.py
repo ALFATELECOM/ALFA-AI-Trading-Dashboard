@@ -1,8 +1,6 @@
-
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import os
 
 app = FastAPI()
 
@@ -17,15 +15,15 @@ class TradeRequest(BaseModel):
     strategy: str
     capital: int
     tsl: float
-    paper: bool
+    paper_mode: bool
 
 @app.get("/")
 def read_root():
-    return {"status": "OK", "message": "ALFA AI Backend is running."}
+    return {"status": "OK", "message": "Backend is running"}
 
 @app.post("/trade")
-def execute_trade(data: TradeRequest):
-    if data.paper:
+def trade(data: TradeRequest):
+    if data.paper_mode:
         return {
             "status": "Order Placed (PAPER MODE)",
             "strategy": data.strategy,
@@ -39,4 +37,4 @@ def execute_trade(data: TradeRequest):
             }
         }
     else:
-        return {"status": "error", "message": "Live trading setup pending."}
+        return {"status": "LIVE MODE", "message": "Place real trade here"}
