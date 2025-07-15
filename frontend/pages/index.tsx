@@ -1,9 +1,17 @@
+import Head from "next/head";
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div style={{ textAlign: 'center', marginTop: '50px' }}>
-      <h1>✅ ALFA AI Trading Dashboard</h1>
-      <p>Frontend deployed successfully.</p>
-    </div>
+    <>
+      <Head>
+        <title>ALFA AI Dashboard</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      </Head>
+      <main style={{ padding: "2rem", fontFamily: "sans-serif", textAlign: "center" }}>
+        <h1>ALFA AI Dashboard</h1>
+        <p>This is your AI trading frontend running successfully!</p>
+        <p>You can now integrate strategy buttons, capital settings, or broker controls.</p>
+      </main>
+    </>
   );
 }
