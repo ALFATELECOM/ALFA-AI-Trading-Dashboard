@@ -1,5 +1,4 @@
 
 def choose_strategy():
-    # Dummy logic for now
-    # In real-time use technical indicators and price patterns
+    # Sample logic - in future replace with AI strategy picker
     return "Breakout Strategy"
