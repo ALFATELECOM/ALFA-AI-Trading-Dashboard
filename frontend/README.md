@@ -1,2 +1,1 @@
-# ALFA AI Frontend
-This is the TypeScript-ready frontend for ALFA AI Trading Dashboard.
+# ALFA AI Frontend - Connected to Backend
