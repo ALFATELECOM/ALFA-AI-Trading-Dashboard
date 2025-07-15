@@ -1,18 +1,11 @@
+import React from 'react';
 
-import React from "react";
-
-const Home = () => {
+export default function Home() {
   return (
-    <div style={{ textAlign: "center", marginTop: "100px" }}>
+    <div style={{ textAlign: 'center', marginTop: '100px' }}>
       <h1>✅ ALFA AI Trading Dashboard</h1>
-      <p>
-        This is your AI trading frontend running successfully using <b>TypeScript (TSX)</b>!
-      </p>
-      <p>
-        You can now integrate strategy buttons, capital settings, or broker controls.
-      </p>
+      <p>This is your AI trading frontend running successfully using <strong>TypeScript (TSX)</strong>!</p>
+      <p>You can now integrate strategy buttons, capital settings, or broker controls.</p>
     </div>
   );
-};
-
-export default Home;
+}
