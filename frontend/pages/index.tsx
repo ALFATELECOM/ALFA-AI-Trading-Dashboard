@@ -1,7 +1,10 @@
 import React from 'react';
 
-const Home = () => {
-  return <div>✅ ALFA AI Trading Dashboard with Types Installed</div>;
-};
-
-export default Home;
+export default function Home() {
+  return (
+    <div style={{ padding: '2rem' }}>
+      <h1>✅ ALFA AI Trading Dashboard</h1>
+      <p>TSX frontend loaded with required packages. You are ready to deploy on Vercel!</p>
+    </div>
+  );
+}
