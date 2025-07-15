@@ -1,40 +1,52 @@
-from fastapi import FastAPI
+
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from typing import Optional
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 class TradeRequest(BaseModel):
     strategy: str
-    capital: int
+    capital: float
     tsl: float
-    paper_mode: bool
-
-@app.get("/")
-def read_root():
-    return {"status": "OK", "message": "Backend is running"}
+    paper: Optional[bool] = True
 
 @app.post("/trade")
-def trade(data: TradeRequest):
-    if data.paper_mode:
-        return {
-            "status": "Order Placed (PAPER MODE)",
-            "strategy": data.strategy,
-            "capital_used": data.capital,
-            "response": {
-                "order_id": "MOCK12345",
-                "symbol": "BANKNIFTY",
-                "action": "BUY",
-                "quantity": 5,
-                "price": 100
-            }
-        }
-    else:
-        return {"status": "LIVE MODE", "message": "Place real trade here"}
+def execute_trade(data: TradeRequest):
+    # Placeholder for real trade execution logic
+    return {
+        "status": "success",
+        "strategy": data.strategy,
+        "capital": data.capital,
+        "tsl": data.tsl,
+        "mode": "paper" if data.paper else "live"
+    }
+
+@app.get("/funds")
+def get_funds(broker: Optional[str] = "Zerodha"):
+    # Placeholder for fund fetch
+    return {
+        "broker": broker,
+        "available_margin": 20000,
+        "used_margin": 5000
+    }
+
+@app.get("/orders")
+def get_orders(broker: Optional[str] = "Zerodha"):
+    # Placeholder for order history
+    return {
+        "broker": broker,
+        "orders": [
+            {"symbol": "NIFTY", "type": "BUY", "qty": 1, "status": "Executed"},
+            {"symbol": "BANKNIFTY", "type": "SELL", "qty": 1, "status": "Executed"}
+        ]
+    }
