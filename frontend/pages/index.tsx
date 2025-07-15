@@ -1,36 +1,32 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 export default function Home() {
-  const [strategy, setStrategy] = useState("Loading...");
-  const [response, setResponse] = useState("");
+  const [strategy, setStrategy] = useState('');
+  const [response, setResponse] = useState(null);
 
   useEffect(() => {
-    fetch("https://alfa-ai-trading-dashboard.onrender.com/analyze")
-      .then((res) => res.json())
-      .then((data) => setStrategy(data.strategy))
-      .catch(() => setStrategy("Error fetching strategy"));
+    axios.get('https://alfa-ai-trading-dashboard.onrender.com/strategy')
+      .then(res => setStrategy(res.data.strategy))
+      .catch(() => setStrategy('Error fetching strategy'));
   }, []);
 
-  const handleTrade = () => {
-    fetch("https://alfa-ai-trading-dashboard.onrender.com/trade", {
-      method: "POST"
-    })
-    .then(res => res.json())
-    .then(data => setResponse(JSON.stringify(data, null, 2)))
-    .catch(err => setResponse("Error placing trade"));
+  const executeTrade = async () => {
+    try {
+      const res = await axios.post('https://alfa-ai-trading-dashboard.onrender.com/trade');
+      setResponse(res.data);
+    } catch {
+      setResponse({ status: 'Error placing order' });
+    }
   };
 
   return (
-    <div style={{ textAlign: 'center', marginTop: '50px' }}>
+    <div style={{ textAlign: 'center', paddingTop: '100px' }}>
       <h1>✅ ALFA AI Trading Dashboard</h1>
-      <p><b>📊 Strategy Selected:</b> {strategy}</p>
-      <button onClick={handleTrade} style={{
-        padding: "10px 20px",
-        fontSize: "16px",
-        marginTop: "20px"
-      }}>🚀 Execute Trade</button>
-      <pre style={{ textAlign: 'left', width: '50%', margin: '20px auto' }}>{response}</pre>
+      <h3>📊 <strong>Strategy Selected:</strong> {strategy}</h3>
+      <button onClick={executeTrade}>🚀 Execute Trade</button>
+      {response && <pre>{JSON.stringify(response, null, 2)}</pre>}
     </div>
   );
 }
