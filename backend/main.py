@@ -1,53 +1,40 @@
-
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from strategies.ai_selector import choose_strategy
-from zerodha.broker import place_order
 from pydantic import BaseModel
 
 app = FastAPI()
 
-# Allow frontend
-origins = [
-    "https://alfa-ai-trading-dashboard.vercel.app",
-    "*"
-]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# In-memory config
-config = {
-    "capital_limit": 500,
-    "tsl_percent": 1.5
-}
+class TradeRequest(BaseModel):
+    strategy: str
+    capital: int
+    tsl: float
 
-class SettingsInput(BaseModel):
-    capital_limit: float
-    tsl_percent: float
+@app.get("/")
+def read_root():
+    return {"status": "OK", "message": "ALFA AI Backend is running."}
 
-@app.get("/analyze")
-def analyze():
-    strategy = choose_strategy()
-    return {"strategy": strategy}
-
-@app.post("/settings")
-def update_settings(input: SettingsInput):
-    config["capital_limit"] = input.capital_limit
-    config["tsl_percent"] = input.tsl_percent
-    return {"status": "Settings updated", "config": config}
+@app.get("/strategy")
+def get_strategy():
+    return {"strategy": "Breakout Strategy"}
 
 @app.post("/trade")
-def execute_trade():
-    strategy = choose_strategy()
-    result = place_order(strategy, config["capital_limit"])
+def execute_trade(data: TradeRequest):
     return {
         "status": "Order Placed",
-        "strategy": strategy,
-        "capital_used": config["capital_limit"],
-        "response": result
+        "strategy": data.strategy,
+        "capital_used": data.capital,
+        "response": {
+            "order_id": "MOCK12345",
+            "symbol": "BANKNIFTY",
+            "action": "BUY",
+            "quantity": 5,
+            "price": 100
+        }
     }
