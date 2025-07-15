@@ -1,85 +1,115 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
-const Home = () => {
+export default function Dashboard() {
   const [capital, setCapital] = useState(500);
-  const [trailingSL, setTrailingSL] = useState(1);
-  const [usePaperMode, setUsePaperMode] = useState(true);
-  const [tradeResponse, setTradeResponse] = useState(null);
-  const [walletFunds, setWalletFunds] = useState(null);
-  const [orderHistory, setOrderHistory] = useState(null);
+  const [tsl, setTsl] = useState(1);
+  const [paperMode, setPaperMode] = useState(true);
+  const [strategy, setStrategy] = useState('Breakout Strategy');
+  const [broker, setBroker] = useState('Zerodha');
+  const [funds, setFunds] = useState(null);
+  const [orders, setOrders] = useState(null);
+  const [response, setResponse] = useState(null);
 
-  const backendUrl = 'https://alfa-ai-backend-your-link.onrender.com';
+  const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://alfa-ai-backend.onrender.com';
 
-  const executeTrade = async () => {
-    try {
-      const res = await fetch(`${backendUrl}/api/trade`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          capital_per_trade: capital,
-          trailing_sl_percent: trailingSL,
-          paper_mode: usePaperMode,
-        }),
-      });
-      const data = await res.json();
-      setTradeResponse(data);
-    } catch (err) {
-      setTradeResponse({ status: 'error', message: 'Network Error' });
-    }
+  const handleTrade = async () => {
+    const res = await axios.post(`${baseUrl}/trade`, {
+      strategy,
+      capital,
+      tsl,
+      paper: paperMode,
+    });
+    setResponse(res.data);
   };
 
-  const checkWalletFunds = async () => {
-    try {
-      const res = await fetch(`${backendUrl}/api/funds`);
-      const data = await res.json();
-      setWalletFunds(data);
-    } catch (err) {
-      setWalletFunds({ status: 'error', message: 'Network Error' });
-    }
+  const fetchFunds = async () => {
+    const res = await axios.get(`${baseUrl}/funds?broker=${broker}`);
+    setFunds(res.data);
   };
 
-  const fetchOrderHistory = async () => {
-    try {
-      const res = await fetch(`${backendUrl}/api/orders`);
-      const data = await res.json();
-      setOrderHistory(data);
-    } catch (err) {
-      setOrderHistory({ status: 'error', message: 'Network Error' });
-    }
+  const fetchOrders = async () => {
+    const res = await axios.get(`${baseUrl}/orders?broker=${broker}`);
+    setOrders(res.data);
   };
 
   return (
-    <div style={{ padding: 30 }}>
+    <div style={{ padding: '30px', fontFamily: 'Arial' }}>
       <h1>✅ ALFA AI Trading Dashboard</h1>
-      <p><b>📈 Strategy:</b> Breakout Strategy</p>
 
-      <label>Capital per Trade (₹): </label>
-      <input type="number" value={capital} onChange={(e) => setCapital(Number(e.target.value))} /><br />
+      <p><strong>📊 Strategy:</strong> {strategy}</p>
 
-      <label>Trailing SL %: </label>
-      <select value={trailingSL} onChange={(e) => setTrailingSL(Number(e.target.value))}>
-        {[0.5, 1, 1.5, 2].map(v => <option key={v} value={v}>{v}</option>)}
-      </select><br />
+      <div>
+        <label>Capital per Trade (₹): </label>
+        <input
+          type="number"
+          value={capital}
+          onChange={(e) => setCapital(Number(e.target.value))}
+        />
+      </div>
 
-      <label>
-        <input type="checkbox" checked={usePaperMode} onChange={(e) => setUsePaperMode(e.target.checked)} />
-        Use Paper Mode
-      </label><br /><br />
+      <div>
+        <label>Trailing SL %: </label>
+        <select value={tsl} onChange={(e) => setTsl(Number(e.target.value))}>
+          <option value={1}>1</option>
+          <option value={2}>2</option>
+          <option value={3}>3</option>
+        </select>
+      </div>
 
-      <button onClick={executeTrade}>💸 Execute Trade</button>{' '}
-      <button onClick={checkWalletFunds}>💼 Check Wallet Funds</button>
+      <div>
+        <label><input type="checkbox" checked={paperMode} onChange={() => setPaperMode(!paperMode)} /> Use Paper Mode</label>
+      </div>
 
-      <h3>📊 Trade Response</h3>
-      <pre>{JSON.stringify(tradeResponse, null, 2)}</pre>
+      <div>
+        <label>Broker: </label>
+        <select value={broker} onChange={(e) => setBroker(e.target.value)}>
+          <option value="Zerodha">Zerodha</option>
+          <option value="MStock">MStock</option>
+          <option value="Paper">Paper</option>
+        </select>
+      </div>
 
-      <h3>💰 Wallet Funds</h3>
-      <pre>{JSON.stringify(walletFunds, null, 2)}</pre>
+      <div style={{ marginTop: '10px' }}>
+        <button onClick={handleTrade}>🚀 Execute Trade</button>
+        <button onClick={fetchFunds} style={{ marginLeft: '10px' }}>💰 Check Wallet Funds</button>
+        <button onClick={fetchOrders} style={{ marginLeft: '10px' }}>📄 Fetch Order History</button>
+      </div>
 
-      <button onClick={fetchOrderHistory}>📄 Fetch Order History</button>
-      <h3>🧾 Order History</h3>
-      <pre>{JSON.stringify(orderHistory, null, 2)}</pre>
+      {response && (
+        <div>
+          <h3>📌 Trade Response</h3>
+          <pre>{JSON.stringify(response, null, 2)}</pre>
+        </div>
+      )}
+
+      {funds && (
+        <div>
+          <h3>💼 Wallet Funds</h3>
+          <pre>{JSON.stringify(funds, null, 2)}</pre>
+        </div>
+      )}
+
+      {orders && (
+        <div>
+          <h3>📑 Order History</h3>
+          <pre>{JSON.stringify(orders, null, 2)}</pre>
+        </div>
+      )}
+
+      <hr />
+      <h2>⚙️ Advanced Features (Coming Next)</h2>
+      <ul>
+        <li>🔐 Max Daily Loss Lock</li>
+        <li>📈 AI-Based Entry Predictor</li>
+        <li>📊 Sentiment Meter</li>
+        <li>🧠 Smart CE/PE Suggestion</li>
+        <li>🕓 Auto Square-Off at 3:25 PM</li>
+        <li>📥 Basket Order Upload</li>
+        <li>📤 Trade Journal Export</li>
+        <li>📲 Telegram + WhatsApp Alerts</li>
+        <li>📧 Email Summary (EOD)</li>
+      </ul>
     </div>
   );
-};
-
-export default Home;
+}
