@@ -1,23 +1,22 @@
 
 from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
+from app.routers import trade, funds, orders
 
 app = FastAPI()
 
-class TradeRequest(BaseModel):
-    strategy: str
-    capital: float
-    tsl: float
-    paper: bool
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-@app.post("/trade")
-def trade(req: TradeRequest):
-    return {"status": "success", "message": "Trade Executed", "capital": req.capital, "tsl": req.tsl, "paper": req.paper}
+app.include_router(trade.router)
+app.include_router(funds.router)
+app.include_router(orders.router)
 
-@app.get("/funds")
-def funds(broker: str = "Zerodha"):
-    return {"broker": broker, "balance": 99999.99}
-
-@app.get("/orders")
-def orders(broker: str = "Zerodha"):
-    return {"broker": broker, "orders": [{"symbol": "BANKNIFTY", "status": "COMPLETE"}]}
+@app.get("/")
+async def root():
+    return {"message": "ALFA AI Backend Live"}
