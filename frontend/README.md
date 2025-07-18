@@ -1,1 +1,0 @@
-# ALFA AI Frontend - Connected to Backend
