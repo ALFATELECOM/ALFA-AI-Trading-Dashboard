@@ -2176,5 +2176,24 @@ function handleLogin(event) {
 function toggleTheme() {
     document.body.classList.toggle("dark-mode");
 }
-</script></body>
+</script><script>
+    function handleLogin(event) {
+        event.preventDefault();
+        alert("Demo login submitted!");
+        closeModal('loginModal');
+
+        const dashboard = document.getElementById('tradingDashboard');
+        if (dashboard) {
+            dashboard.style.display = 'block';
+        }
+
+        const hero = document.getElementById('home');
+        if (hero) {
+            hero.style.display = 'none';
+        }
+
+        document.getElementById('dashboardTitle').innerText = "Demo Trader's Dashboard";
+        document.getElementById('userGreeting').innerText = "Welcome back, Demo Trader!";
+    }
+    </script></body>
 </html>
