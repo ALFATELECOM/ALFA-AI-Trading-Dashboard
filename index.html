@@ -634,7 +634,12 @@
             animation: fadeInUp 0.6s ease forwards;
         }
     </style>
-</head>
+<style>
+.tab-btn.active {
+    background-color: #6366f1 !important;
+    color: white !important;
+}
+</style></head>
 <body>
 <!-- Header -->
 <header class="header">
@@ -2109,11 +2114,22 @@
 <div style="text-align: center; margin-top: 30px;">
 <button class="btn btn-primary" onclick="saveAllSettings()" style="padding: 15px 40px; font-size: 1.1rem;">💾 Save All Settings</button>
 </div>
-</div>
-</div>
-</div>
-</div>
 
+<div class="broker-settings" style="margin-top: 30px;">
+<h3 style="margin-bottom: 15px;">🔐 Zerodha Broker API Settings</h3>
+<div style="max-width: 500px;">
+<label style="display: block; margin-bottom: 8px;">API Key</label>
+<input placeholder="Enter your Zerodha API Key" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 15px;" type="text"/>
+<label style="display: block; margin-bottom: 8px;">API Secret</label>
+<input placeholder="Enter your API Secret" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 15px;" type="password"/>
+<label style="display: block; margin-bottom: 8px;">Redirect URL</label>
+<input placeholder="https://yourdomain.com/login" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" type="text" value="https://alfa-ai-trading-dashboard.onrender.com/login"/>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 <script>
 function showDashTab(tabName) {
     document.querySelectorAll('.dash-tab-content').forEach(el => el.style.display = 'none');
