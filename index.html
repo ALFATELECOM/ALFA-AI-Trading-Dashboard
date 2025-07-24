@@ -3401,4 +3401,586 @@ function showDashTab(tabName) {
     }
 }
 </script></body>
+<!-- ADD THIS COMPLETE SCRIPT RIGHT BEFORE </body> TAG -->
+<script>
+// Enhanced Frontend Log Integration for ALFA Trading Dashboard
+class TradingLogManager {
+    constructor() {
+        this.websocket = null;
+        this.backendUrl = 'wss://alfa-ai-backend.onrender.com/ws/logs';
+        this.reconnectAttempts = 0;
+        this.maxReconnectAttempts = 5;
+        this.reconnectDelay = 3000;
+        this.logBuffer = [];
+        this.maxLogBuffer = 100;
+        this.isConnected = false;
+    }
+
+    // Initialize WebSocket connection
+    async initializeLogStream() {
+        try {
+            console.log('🔌 Connecting to backend log stream...');
+            this.websocket = new WebSocket(this.backendUrl);
+            
+            this.websocket.onopen = (event) => {
+                console.log('✅ Connected to backend log stream');
+                this.isConnected = true;
+                this.reconnectAttempts = 0;
+                this.updateConnectionStatus('connected');
+                
+                // Send ping to request recent logs
+                this.websocket.send('ping');
+            };
+
+            this.websocket.onmessage = (event) => {
+                try {
+                    const logEntry = JSON.parse(event.data);
+                    this.handleLogMessage(logEntry);
+                } catch (error) {
+                    console.error('Error parsing log message:', error);
+                }
+            };
+
+            this.websocket.onclose = (event) => {
+                console.log('🔌 Disconnected from backend log stream');
+                this.isConnected = false;
+                this.updateConnectionStatus('disconnected');
+                this.attemptReconnect();
+            };
+
+            this.websocket.onerror = (error) => {
+                console.error('❌ WebSocket error:', error);
+                this.updateConnectionStatus('error');
+            };
+
+        } catch (error) {
+            console.error('❌ Failed to initialize log stream:', error);
+            this.attemptReconnect();
+        }
+    }
+
+    // Handle incoming log messages
+    handleLogMessage(logEntry) {
+        // Add to buffer
+        this.logBuffer.push(logEntry);
+        if (this.logBuffer.length > this.maxLogBuffer) {
+            this.logBuffer.shift();
+        }
+
+        // Display in console with proper formatting
+        this.displayLogInConsole(logEntry);
+        
+        // Update UI log panel if exists
+        this.updateLogPanel(logEntry);
+        
+        // Handle special log types
+        this.handleSpecialLogs(logEntry);
+    }
+
+    // Display formatted logs in browser console
+    displayLogInConsole(logEntry) {
+        const timestamp = new Date(logEntry.timestamp).toLocaleTimeString();
+        const level = logEntry.level;
+        const message = logEntry.message;
+        const location = `${logEntry.module}:${logEntry.function}:${logEntry.line}`;
+
+        // Color coding based on log level
+        const colors = {
+            'INFO': 'color: #06d6a0; font-weight: bold;',
+            'WARNING': 'color: #f59e0b; font-weight: bold;',
+            'ERROR': 'color: #ef4444; font-weight: bold;',
+            'DEBUG': 'color: #6b7280;'
+        };
+
+        const style = colors[level] || 'color: #333;';
+        
+        console.log(
+            `%c[${timestamp}] BACKEND ${level} %c${message} %c(${location})`,
+            style,
+            'color: #333;',
+            'color: #6b7280; font-size: 0.8em;'
+        );
+    }
+
+    // Update log panel in the dashboard
+    updateLogPanel(logEntry) {
+        let logPanel = document.getElementById('logPanel');
+        if (!logPanel) {
+            this.createLogPanel();
+            logPanel = document.getElementById('logPanel');
+        }
+
+        const logItem = this.createLogItem(logEntry);
+        const logContent = logPanel.querySelector('.log-content');
+        
+        if (logContent) {
+            logContent.insertBefore(logItem, logContent.firstChild);
+            
+            // Limit displayed logs
+            const logItems = logContent.querySelectorAll('.log-item');
+            if (logItems.length > 50) {
+                logContent.removeChild(logContent.lastChild);
+            }
+        }
+    }
+
+    // Create a log panel UI element
+    createLogPanel() {
+        const logPanel = document.createElement('div');
+        logPanel.id = 'logPanel';
+        logPanel.className = 'log-panel';
+        logPanel.innerHTML = `
+            <div class="log-header">
+                <h4>🔄 Live Backend Logs</h4>
+                <div class="log-controls">
+                    <span id="connectionStatus" class="status-disconnected">Connecting...</span>
+                    <button onclick="tradingLogManager.clearLogs()" class="btn-clear">Clear</button>
+                    <button onclick="tradingLogManager.toggleLogPanel()" class="btn-minimize">−</button>
+                </div>
+            </div>
+            <div class="log-content" id="logContent"></div>
+        `;
+
+        // Style the log panel
+        logPanel.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 20px;
+            transform: translateY(-50%);
+            width: 400px;
+            max-height: 500px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 1500;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        `;
+
+        // Add CSS styles
+        if (!document.getElementById('logPanelStyles')) {
+            const style = document.createElement('style');
+            style.id = 'logPanelStyles';
+            style.textContent = `
+                .log-header {
+                    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+                    color: white;
+                    padding: 15px 20px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+                
+                .log-header h4 {
+                    margin: 0;
+                    font-size: 14px;
+                }
+                
+                .log-controls {
+                    display: flex;
+                    gap: 10px;
+                    align-items: center;
+                }
+                
+                .status-connected {
+                    color: #06d6a0;
+                    font-weight: bold;
+                    font-size: 12px;
+                }
+                
+                .status-disconnected {
+                    color: #ef4444;
+                    font-weight: bold;
+                    font-size: 12px;
+                }
+                
+                .status-error {
+                    color: #f59e0b;
+                    font-weight: bold;
+                    font-size: 12px;
+                }
+                
+                .btn-clear, .btn-minimize {
+                    background: rgba(255, 255, 255, 0.2);
+                    border: none;
+                    color: white;
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 12px;
+                }
+                
+                .btn-clear:hover, .btn-minimize:hover {
+                    background: rgba(255, 255, 255, 0.3);
+                }
+                
+                .log-content {
+                    padding: 10px;
+                    max-height: 400px;
+                    overflow-y: auto;
+                    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+                    font-size: 12px;
+                    line-height: 1.4;
+                }
+                
+                .log-item {
+                    margin-bottom: 8px;
+                    padding: 8px;
+                    border-radius: 6px;
+                    border-left: 3px solid;
+                    background: rgba(255, 255, 255, 0.05);
+                    animation: fadeIn 0.3s ease;
+                }
+                
+                .log-item.info {
+                    border-left-color: #06d6a0;
+                    color: #e2e8f0;
+                }
+                
+                .log-item.warning {
+                    border-left-color: #f59e0b;
+                    color: #fcd34d;
+                }
+                
+                .log-item.error {
+                    border-left-color: #ef4444;
+                    color: #fca5a5;
+                }
+                
+                .log-item.debug {
+                    border-left-color: #6b7280;
+                    color: #9ca3af;
+                }
+                
+                .log-timestamp {
+                    color: #64748b;
+                    font-size: 10px;
+                    margin-bottom: 2px;
+                }
+                
+                .log-message {
+                    color: inherit;
+                    word-break: break-word;
+                }
+                
+                .log-location {
+                    color: #64748b;
+                    font-size: 10px;
+                    margin-top: 2px;
+                    font-style: italic;
+                }
+                
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        document.body.appendChild(logPanel);
+    }
+
+    // Create individual log item
+    createLogItem(logEntry) {
+        const logItem = document.createElement('div');
+        logItem.className = `log-item ${logEntry.level.toLowerCase()}`;
+        
+        const timestamp = new Date(logEntry.timestamp).toLocaleTimeString();
+        const location = `${logEntry.module}:${logEntry.function}:${logEntry.line}`;
+        
+        logItem.innerHTML = `
+            <div class="log-timestamp">[${timestamp}] ${logEntry.level}</div>
+            <div class="log-message">${logEntry.message}</div>
+            <div class="log-location">${location}</div>
+        `;
+        
+        return logItem;
+    }
+
+    // Handle special log types (signals, orders, etc.)
+    handleSpecialLogs(logEntry) {
+        const message = logEntry.message.toLowerCase();
+        
+        // Show notifications for important events
+        if (message.includes('order executed') || 
+            message.includes('signal generated') || 
+            message.includes('login') ||
+            message.includes('error')) {
+            
+            this.showLogNotification(logEntry);
+        }
+
+        // Update portfolio from backend logs
+        this.updateDashboardFromLogs(logEntry);
+    }
+
+    // Show notification for important logs
+    showLogNotification(logEntry) {
+        if (logEntry.level === 'ERROR' || 
+            logEntry.message.includes('executed') || 
+            logEntry.message.includes('login')) {
+            
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #06d6a0, #00b894);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                z-index: 3000;
+                font-weight: 500;
+                max-width: 350px;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            notification.textContent = `Backend: ${logEntry.message}`;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+    }
+
+    // Update dashboard elements based on backend logs
+    updateDashboardFromLogs(logEntry) {
+        const message = logEntry.message;
+        
+        // Update portfolio value from backend logs
+        if (message.includes('Portfolio value:')) {
+            const valueMatch = message.match(/₹([\d,]+\.?\d*)/);
+            if (valueMatch) {
+                const portfolioValue = valueMatch[0];
+                const portfolioElement = document.getElementById('portfolioValue');
+                if (portfolioElement) {
+                    portfolioElement.textContent = portfolioValue;
+                }
+            }
+        }
+        
+        // Update active connections count
+        if (message.includes('active log connections')) {
+            const connectionsMatch = message.match(/(\d+) active log connections/);
+            if (connectionsMatch) {
+                console.log(`📊 Active log connections: ${connectionsMatch[1]}`);
+            }
+        }
+    }
+
+    // Connection status management
+    updateConnectionStatus(status) {
+        const statusElement = document.getElementById('connectionStatus');
+        if (statusElement) {
+            switch (status) {
+                case 'connected':
+                    statusElement.textContent = '● Connected';
+                    statusElement.className = 'status-connected';
+                    break;
+                case 'disconnected':
+                    statusElement.textContent = '● Disconnected';
+                    statusElement.className = 'status-disconnected';
+                    break;
+                case 'error':
+                    statusElement.textContent = '⚠ Error';
+                    statusElement.className = 'status-error';
+                    break;
+            }
+        }
+    }
+
+    // Reconnection logic
+    attemptReconnect() {
+        if (this.reconnectAttempts < this.maxReconnectAttempts) {
+            this.reconnectAttempts++;
+            console.log(`🔄 Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
+            
+            setTimeout(() => {
+                this.initializeLogStream();
+            }, this.reconnectDelay * this.reconnectAttempts);
+        } else {
+            console.error('❌ Max reconnection attempts reached');
+            this.updateConnectionStatus('error');
+        }
+    }
+
+    // Utility functions
+    clearLogs() {
+        const logContent = document.getElementById('logContent');
+        if (logContent) {
+            logContent.innerHTML = '';
+        }
+        this.logBuffer = [];
+    }
+
+    toggleLogPanel() {
+        const logPanel = document.getElementById('logPanel');
+        const logContent = document.getElementById('logContent');
+        const toggleBtn = document.querySelector('.btn-minimize');
+        
+        if (logContent.style.display === 'none') {
+            logContent.style.display = 'block';
+            toggleBtn.textContent = '−';
+        } else {
+            logContent.style.display = 'none';
+            toggleBtn.textContent = '+';
+        }
+    }
+
+    // Send message to backend
+    sendMessage(message) {
+        if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
+            this.websocket.send(message);
+        }
+    }
+
+    // Get connection status
+    getConnectionStatus() {
+        return {
+            connected: this.isConnected,
+            bufferedLogs: this.logBuffer.length,
+            reconnectAttempts: this.reconnectAttempts
+        };
+    }
+}
+
+// Initialize the log manager globally
+window.tradingLogManager = new TradingLogManager();
+
+// Enhanced login handler with backend communication
+const originalHandleLogin = window.handleLogin;
+window.handleLogin = async function(event) {
+    event.preventDefault();
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    
+    try {
+        console.log('🔐 Attempting backend login...');
+        const response = await fetch('https://alfa-ai-backend.onrender.com/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            console.log('✅ Backend login successful');
+            closeModal('loginModal');
+            sessionStorage.setItem('currentUser', JSON.stringify(result.user));
+            showTradingDashboard(result.user);
+            showSuccessMessage('✅ Welcome to your Trading Dashboard!');
+        } else {
+            console.log('❌ Backend login failed');
+            alert('❌ Invalid credentials!\nTry: demo@trading.com / demo123');
+        }
+    } catch (error) {
+        console.error('❌ Login request failed:', error);
+        // Fallback to original function
+        if (originalHandleLogin) {
+            originalHandleLogin(event);
+        }
+    }
+};
+
+// Enhanced portfolio updates with backend data
+const originalUpdatePortfolioValue = window.updatePortfolioValue;
+window.updatePortfolioValue = async function() {
+    try {
+        const response = await fetch('https://alfa-ai-backend.onrender.com/trade/portfolio');
+        const portfolio = await response.json();
+        
+        if (portfolio.total_value) {
+            const portfolioElement = document.getElementById('portfolioValue');
+            const balanceElement = document.querySelector('.balance-display');
+            
+            if (portfolioElement) {
+                portfolioElement.textContent = `₹${portfolio.total_value.toLocaleString()}`;
+            }
+            if (balanceElement) {
+                balanceElement.textContent = `₹${portfolio.total_value.toLocaleString()}`;
+            }
+            
+            console.log(`💰 Portfolio updated from backend: ₹${portfolio.total_value.toLocaleString()}`);
+        }
+    } catch (error) {
+        console.error('❌ Failed to fetch portfolio from backend:', error);
+        // Fallback to original function
+        if (originalUpdatePortfolioValue) {
+            originalUpdatePortfolioValue();
+        }
+    }
+};
+
+// Enhanced order execution with backend communication
+const originalExecuteSignal = window.executeSignal;
+window.executeSignal = async function(symbol, action) {
+    try {
+        console.log(`🚀 Sending ${action} order for ${symbol} to backend...`);
+        
+        const response = await fetch('https://alfa-ai-backend.onrender.com/trade/order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                symbol: symbol,
+                action: action,
+                quantity: 1,
+                price: Math.random() * 1000 + 1000
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showSuccessMessage(`✅ ${action} order for ${symbol} executed via backend!`);
+            updatePortfolioValue();
+        }
+    } catch (error) {
+        console.error('❌ Backend order execution failed:', error);
+        // Fallback to original function
+        if (originalExecuteSignal) {
+            originalExecuteSignal(symbol, action);
+        }
+    }
+};
+
+// Initialize when dashboard loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Initializing Enhanced Backend Log Integration...');
+    
+    // Remove repetitive frontend debug logs
+    const originalConsoleLog = console.log;
+    console.log = function(...args) {
+        const message = args.join(' ');
+        // Filter out repetitive frontend debug messages
+        if (!message.includes('updateMarketDataDisplay function triggered') &&
+            !message.includes('updatePositionDisplay function triggered') &&
+            !message.includes('updateMarketWatchDisplay function triggered')) {
+            originalConsoleLog.apply(console, args);
+        }
+    };
+    
+    // Start log stream connection after a short delay
+    setTimeout(() => {
+        window.tradingLogManager.initializeLogStream();
+    }, 3000);
+    
+    // Add welcome message
+    setTimeout(() => {
+        console.log('✅ ALFA Trading Dashboard with Backend Integration Ready!');
+        console.log('📡 Backend logs will appear above this line');
+        console.log('🔌 Log panel will appear on the left when connected');
+    }, 4000);
+});
+
+console.log('📡 ALFA Trading Backend Log Integration Script Loaded Successfully!');
+</script>
 </html>
