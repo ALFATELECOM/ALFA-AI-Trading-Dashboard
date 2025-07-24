@@ -529,6 +529,17 @@
             }
         }
 
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
         .fade-in-up {
             animation: fadeInUp 0.6s ease forwards;
         }
@@ -651,6 +662,15 @@
             <span class="close" onclick="closeModal('loginModal')">&times;</span>
             <h2>Login to TradingPro</h2>
             <p>Access your trading dashboard</p>
+            
+            <!-- Demo Credentials Info -->
+            <div style="background: rgba(6, 214, 160, 0.1); padding: 15px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #06d6a0;">
+                <h4 style="color: #06d6a0; margin: 0 0 10px 0;">🎯 Demo Credentials:</h4>
+                <p style="margin: 5px 0; font-family: monospace;"><strong>Email:</strong> demo@trading.com</p>
+                <p style="margin: 5px 0; font-family: monospace;"><strong>Password:</strong> demo123</p>
+                <small style="color: #64748b;">Use these credentials to test the login system</small>
+            </div>
+            
             <form onsubmit="handleLogin(event)">
                 <div class="form-group">
                     <label for="loginEmail">Email</label>
@@ -660,6 +680,12 @@
                     <label for="loginPassword">Password</label>
                     <input type="password" id="loginPassword" required placeholder="Enter password">
                 </div>
+                
+                <!-- Quick Fill Button -->
+                <button type="button" onclick="fillDemoCredentials()" style="background: rgba(99, 102, 241, 0.1); color: #6366f1; border: 1px solid #6366f1; padding: 8px 15px; border-radius: 5px; margin-bottom: 15px; cursor: pointer; font-size: 14px;">
+                    🚀 Fill Demo Credentials
+                </button>
+                
                 <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
             </form>
         </div>
@@ -736,16 +762,80 @@
             }
         }
 
+        // Fill demo credentials function
+        function fillDemoCredentials() {
+            document.getElementById('loginEmail').value = 'demo@trading.com';
+            document.getElementById('loginPassword').value = 'demo123';
+            
+            // Add visual feedback
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = '✅ Filled!';
+            button.style.background = 'rgba(6, 214, 160, 0.2)';
+            button.style.color = '#06d6a0';
+            button.style.borderColor = '#06d6a0';
+            
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.style.background = 'rgba(99, 102, 241, 0.1)';
+                button.style.color = '#6366f1';
+                button.style.borderColor = '#6366f1';
+            }, 1500);
+        }
+
         // Login Handler
         function handleLogin(event) {
             event.preventDefault();
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
             
-            // Simulate login process
-            console.log('Login attempt:', { email, password });
-            alert('Login functionality would be implemented here!');
-            closeModal('loginModal');
+            // Demo credentials for testing
+            const validCredentials = [
+                { email: 'demo@trading.com', password: 'demo123' },
+                { email: 'trader@example.com', password: 'trader123' },
+                { email: 'admin@tradingpro.com', password: 'admin123' }
+            ];
+            
+            // Check if credentials match
+            const isValid = validCredentials.some(cred => 
+                cred.email === email && cred.password === password
+            );
+            
+            if (isValid) {
+                alert('✅ Login Successful! Welcome to TradingPro Dashboard!');
+                console.log('✅ Login successful for:', email);
+                closeModal('loginModal');
+                
+                // Here you could redirect to dashboard or show different content
+                showSuccessMessage('Login successful! Dashboard would load here.');
+            } else {
+                alert('❌ Invalid credentials! Try:\nEmail: demo@trading.com\nPassword: demo123');
+                console.log('❌ Login failed for:', email);
+            }
+        }
+        
+        // Success message function
+        function showSuccessMessage(message) {
+            const successDiv = document.createElement('div');
+            successDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #06d6a0, #00b894);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                z-index: 3000;
+                font-weight: 500;
+                animation: slideIn 0.3s ease;
+            `;
+            successDiv.textContent = message;
+            document.body.appendChild(successDiv);
+            
+            setTimeout(() => {
+                successDiv.remove();
+            }, 5000);
         }
 
         // Data Feed Toggle
