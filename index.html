@@ -3416,7 +3416,22 @@ function showDashTab(tabName) {
         activeBtn.classList.add('active');
     }
 }
+</script><script>
+// Simulated logic for Vercel (no backend)
+document.addEventListener("DOMContentLoaded", function () {
+    const autoBtn = document.querySelector("button[onclick*='Auto trading']");
+    if (autoBtn) {
+        autoBtn.onclick = () => alert("Auto trading settings saved (simulated)");
+    }
+
+    const saveZerodhaBtn = document.querySelector("button[onclick*='Zerodha settings']");
+    if (saveZerodhaBtn) {
+        saveZerodhaBtn.onclick = () => {
+            const key = document.getElementById('apiKey')?.value;
+            const secret = document.getElementById('apiSecret')?.value;
+            alert("Saved Zerodha Settings:\nAPI Key: " + key + "\nSecret: " + secret);
+        };
+    }
+});
 </script></body>
 </html>
-
-
