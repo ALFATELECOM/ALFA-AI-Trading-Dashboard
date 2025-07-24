@@ -3377,5 +3377,28 @@ function updatePositionsDisplay() {
     console.log("updatePositionsDisplay function triggered. You can implement your logic here.");
     // TODO: Add logic to update UI with live positions
 }
+</script><script>
+function updateMarketWatchDisplay() {
+    console.log("updateMarketWatchDisplay function triggered. You can implement your logic here.");
+    // TODO: Add logic to update the market watch display
+}
+</script><script>
+function showDashTab(tabName) {
+    const tabs = document.querySelectorAll('.dash-tab-content');
+    tabs.forEach(tab => tab.style.display = 'none');
+
+    const selectedTab = document.getElementById(tabName + 'Tab');
+    if (selectedTab) {
+        selectedTab.style.display = 'block';
+    }
+
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    tabButtons.forEach(btn => btn.classList.remove('active'));
+
+    const activeBtn = Array.from(tabButtons).find(btn => btn.innerText.replace(/\s+/g, '-').toLowerCase().includes(tabName));
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+    }
+}
 </script></body>
 </html>
