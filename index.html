@@ -2114,7 +2114,6 @@
 <div style="text-align: center; margin-top: 30px;">
 <button class="btn btn-primary" onclick="saveAllSettings()" style="padding: 15px 40px; font-size: 1.1rem;">💾 Save All Settings</button>
 </div>
-
 <div class="broker-settings" style="margin-top: 30px;">
 <h3 style="margin-bottom: 15px;">🔐 Zerodha Broker API Settings</h3>
 <div style="max-width: 500px;">
@@ -2148,5 +2147,34 @@ function updatePositionsDisplay() {
 function updateMarketWatchDisplay() {
     console.log("updateMarketWatchDisplay function triggered. You can implement your logic here.");
 }
-</script></body>
+</script><script>
+    function showModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'block';
+        }
+    }
+
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    function fillDemoCredentials() {
+        const email = document.getElementById("loginEmail");
+        const password = document.getElementById("loginPassword");
+        if (email && password) {
+            email.value = "demo@trading.com";
+            password.value = "demo123";
+        }
+    }
+
+    function handleLogin(event) {
+        event.preventDefault();
+        alert("Demo login submitted!");
+        closeModal('loginModal');
+    }
+    </script></body>
 </html>
