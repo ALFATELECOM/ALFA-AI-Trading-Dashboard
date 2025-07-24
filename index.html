@@ -3402,3 +3402,22 @@ function showDashTab(tabName) {
 }
 </script></body>
 </html>
+<section id="reports">
+  <h2>📊 Trade Reports</h2>
+  <table border="1" style="width:100%; background:#fff; color:#000;">
+    <thead>
+      <tr><th>Symbol</th><th>Entry Time</th><th>Exit Time</th><th>Entry Price</th><th>Exit Price</th><th>P&L</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>NIFTY</td><td>9:20 AM</td><td>10:45 AM</td><td>19,800</td><td>19,850</td><td>+₹2500</td></tr>
+      <tr><td>BANKNIFTY</td><td>11:00 AM</td><td>1:15 PM</td><td>45,100</td><td>45,000</td><td>-₹1000</td></tr>
+    </tbody>
+  </table>
+  <button onclick="exportReport()">📤 Export Report</button>
+</section>
+
+<script>
+function exportReport() {
+    alert('Export options: Excel, PDF, JPEG coming soon...');
+}
+</script>
