@@ -634,12 +634,7 @@
             animation: fadeInUp 0.6s ease forwards;
         }
     </style>
-<style>
-.tab-btn.active {
-    background-color: #6366f1 !important;
-    color: white !important;
-}
-</style></head>
+</head>
 <body>
 <!-- Header -->
 <header class="header">
@@ -3406,36 +3401,12 @@ function showDashTab(tabName) {
     }
 }
 </script><script>
-function showDashTab(tabName) {
-    document.querySelectorAll('.dash-tab-content').forEach(el => el.style.display = 'none');
-    const activeTab = document.getElementById(tabName + 'Tab');
-    if (activeTab) activeTab.style.display = 'block';
-
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    const btnMatch = Array.from(document.querySelectorAll('.tab-btn')).find(btn => btn.innerText.toLowerCase().includes(tabName.replace('-', '')));
-    if (btnMatch) btnMatch.classList.add('active');
-}
-
-function updatePositionsDisplay() {
-    console.log("updatePositionsDisplay function triggered.");
-}
-
-function updateMarketWatchDisplay() {
-    console.log("updateMarketWatchDisplay function triggered.");
-}
-
-function toggleTheme() {
-    document.body.classList.toggle("dark-mode");
-}
-
-function showModal(id) {
-    const modal = document.getElementById(id);
-    if (modal) modal.style.display = "block";
-}
-
-function closeModal(id) {
-    const modal = document.getElementById(id);
-    if (modal) modal.style.display = "none";
-}
+function viewStrategy() { console.log("viewStrategy() called"); }
+function pauseStrategy() { console.log("pauseStrategy() called"); }
+function resetPaperAccount() { console.log("resetPaperAccount() called"); }
+function loadTemplate() { console.log("loadTemplate() called"); }
+function toggleDataFeed() { console.log("toggleDataFeed() called"); }
+function addBroker() { console.log("addBroker() called"); }
+function toggleTrailingStop() { console.log("toggleTrailingStop() called"); }
 </script></body>
 </html>
