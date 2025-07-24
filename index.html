@@ -1870,6 +1870,22 @@
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
 <h3>Connected Broker Accounts</h3>
 <button class="btn btn-primary" onclick="addBroker()">+ Add Broker</button>
+<div id="brokerForm" style="margin-top: 10px; display: none;">
+<label>API Key: <input id="apiKey" type="text"/></label><br/>
+<label>API Secret: <input id="apiSecret" type="text"/></label><br/>
+<button onclick="saveBrokerSettings()">Save Settings</button>
+</div>
+<script>
+        function saveBrokerSettings() {
+            const key = document.getElementById('apiKey').value;
+            const secret = document.getElementById('apiSecret').value;
+            alert('Saved: ' + key + ' / ' + secret);
+        }
+        document.querySelector('button').addEventListener('click', () => {
+            const form = document.getElementById('brokerForm');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        });
+        </script>
 </div>
 <div class="brokers-grid" style="display: grid; gap: 20px;">
 <div class="broker-card connected" style="background: white; padding: 25px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 5px 20px rgba(0,0,0,0.1); border-left: 4px solid var(--accent-color);">
@@ -3400,34 +3416,7 @@ function showDashTab(tabName) {
         activeBtn.classList.add('active');
     }
 }
-</script><div id="auto-trading">✅ Auto Trading logic module successfully connected.</div><div id="strategy-builder">✅ Strategy Builder Save/Pause functions restored.</div><button onclick="alert('Broker connected successfully!');">Test Broker Click</button><div id="trade-report">
-<h3>Executed Trade Reports</h3>
-<table border="1" cellpadding="5">
-<tr><th>Entry Time</th><th>Exit Time</th><th>Entry Price</th><th>Exit Price</th><th>P&amp;L</th></tr>
-<tr><td>09:20 AM</td><td>09:45 AM</td><td>₹452.25</td><td>₹460.10</td><td>+₹7.85</td></tr>
-</table>
-</div><div id="export-options">
-<h4>Export Reports (Coming Soon)</h4>
-<button disabled="">Export to Excel</button>
-<button disabled="">Export to PDF</button>
-<button disabled="">Export to JPEG</button>
-</div></body>
+</script></body>
 </html>
-<section id="reports">
-<h2>📊 Trade Reports</h2>
-<table border="1" style="width:100%; background:#fff; color:#000;">
-<thead>
-<tr><th>Symbol</th><th>Entry Time</th><th>Exit Time</th><th>Entry Price</th><th>Exit Price</th><th>P&amp;L</th></tr>
-</thead>
-<tbody>
-<tr><td>NIFTY</td><td>9:20 AM</td><td>10:45 AM</td><td>19,800</td><td>19,850</td><td>+₹2500</td></tr>
-<tr><td>BANKNIFTY</td><td>11:00 AM</td><td>1:15 PM</td><td>45,100</td><td>45,000</td><td>-₹1000</td></tr>
-</tbody>
-</table>
-<button onclick="exportReport()">📤 Export Report</button>
-</section>
-<script>
-function exportReport() {
-    alert('Export options: Excel, PDF, JPEG coming soon...');
-}
-</script>
+
+
