@@ -1,1 +1,0 @@
-Install deps with `npm install`, run locally with `npm run dev`
