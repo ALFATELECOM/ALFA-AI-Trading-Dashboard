@@ -703,7 +703,48 @@
 </div>
 </section>
 <!-- Services Section -->
-
+<section class="services" id="services">
+<div class="container">
+<div class="section-header">
+<h2>Our Trading Solutions</h2>
+<p>Professional-grade trading automation services designed to give you the competitive edge in today's markets</p>
+</div>
+<div class="services-grid">
+<div class="service-card">
+<div class="service-icon">
+<i class="fas fa-plug"></i>
+</div>
+<h3>API Bridge Connectivity</h3>
+<p>Seamless integration with major trading platforms and brokers through our advanced API bridge technology.</p>
+<a class="btn btn-primary" href="#contact">Learn More</a>
+</div>
+<div class="service-card">
+<div class="service-icon">
+<i class="fas fa-robot"></i>
+</div>
+<h3>Algorithmic Trading</h3>
+<p>Fully automated trading strategies optimized for maximum efficiency and consistent performance.</p>
+<a class="btn btn-primary" href="#contact">Learn More</a>
+</div>
+<div class="service-card">
+<div class="service-icon">
+<i class="fas fa-signal"></i>
+</div>
+<h3>Auto Buy/Sell Signals</h3>
+<p>Real-time trading alerts and automated execution based on proven technical analysis algorithms.</p>
+<a class="btn btn-primary" href="#contact">Learn More</a>
+</div>
+<div class="service-card">
+<div class="service-icon">
+<i class="fas fa-code"></i>
+</div>
+<h3>MQL Development</h3>
+<p>Custom Expert Advisors and indicators for MetaTrader platforms tailored to your trading strategy.</p>
+<a class="btn btn-primary" href="#contact">Learn More</a>
+</div>
+</div>
+</div>
+</section>
 <!-- Login Modal -->
 <div class="modal" id="loginModal">
 <div class="modal-content">
@@ -2073,22 +2114,1298 @@
 <div style="text-align: center; margin-top: 30px;">
 <button class="btn btn-primary" onclick="saveAllSettings()" style="padding: 15px 40px; font-size: 1.1rem;">💾 Save All Settings</button>
 </div>
-<div class="broker-settings" style="margin-top: 30px;">
-<h3 style="margin-bottom: 15px;">🔐 Zerodha Broker API Settings</h3>
-<div style="max-width: 500px;">
-<label style="display: block; margin-bottom: 8px;">API Key</label>
-<input placeholder="Enter your Zerodha API Key" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 15px;" type="text"/>
-<label style="display: block; margin-bottom: 8px;">API Secret</label>
-<input placeholder="Enter your API Secret" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 15px;" type="password"/>
-<label style="display: block; margin-bottom: 8px;">Redirect URL</label>
-<input placeholder="https://yourdomain.com/login" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;" type="text" value="https://alfa-ai-trading-dashboard.onrender.com/login"/>
-</div>
-</div>
 </div>
 </div>
 </div>
 </div>
 <script>
+        // Theme Toggle Function
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const themeIcon = document.querySelector('.theme-toggle i');
+            if (document.body.classList.contains('dark-mode')) {
+                themeIcon.className = 'fas fa-sun';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                themeIcon.className = 'fas fa-moon';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        // Modal Functions
+        function showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'block';
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // Fill demo credentials function
+        function fillDemoCredentials() {
+            document.getElementById('loginEmail').value = 'demo@trading.com';
+            document.getElementById('loginPassword').value = 'demo123';
+            
+            // Add visual feedback
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = '✅ Filled!';
+            button.style.background = 'rgba(6, 214, 160, 0.2)';
+            button.style.color = '#06d6a0';
+            button.style.borderColor = '#06d6a0';
+            
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.style.background = 'rgba(99, 102, 241, 0.1)';
+                button.style.color = '#6366f1';
+                button.style.borderColor = '#6366f1';
+            }, 1500);
+        }
+
+        // Login Handler
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            // Demo credentials for testing
+            const validCredentials = [
+                { email: 'demo@trading.com', password: 'demo123', name: 'Demo Trader' },
+                { email: 'trader@example.com', password: 'trader123', name: 'Professional Trader' },
+                { email: 'admin@tradingpro.com', password: 'admin123', name: 'Admin User' }
+            ];
+            
+            // Check if credentials match
+            const user = validCredentials.find(cred => 
+                cred.email === email && cred.password === password
+            );
+            
+            if (user) {
+                console.log('✅ Login successful for:', email);
+                closeModal('loginModal');
+                
+                // Store user info
+                sessionStorage.setItem('currentUser', JSON.stringify(user));
+                
+                // Show dashboard
+                showTradingDashboard(user);
+                showSuccessMessage('✅ Welcome to your Trading Dashboard!');
+            } else {
+                alert('❌ Invalid credentials! Try:\nEmail: demo@trading.com\nPassword: demo123');
+                console.log('❌ Login failed for:', email);
+            }
+        }
+        
+        // Global trading state
+        let currentTradingMode = 'paper'; // 'paper' or 'live'
+        let trailingStopEnabled = false;
+
+        // Show Trading Dashboard
+        function showTradingDashboard(user) {
+            // Hide main website content
+            document.getElementById('home').style.display = 'none';
+            document.getElementById('services').style.display = 'none';
+            document.querySelector('.header').style.display = 'none';
+            
+            // Show dashboard
+            document.getElementById('tradingDashboard').style.display = 'block';
+            
+            // Update user info
+            document.getElementById('userGreeting').textContent = `Welcome back, ${user.name}!`;
+            document.getElementById('dashboardTitle').textContent = `${user.name}'s Dashboard`;
+            
+            // Initialize trading mode
+            updateTradingModeDisplay();
+            
+            // Start real-time updates
+            startDashboardUpdates();
+        }
+
+        // Trading Mode Management
+        function setTradingMode(mode) {
+            currentTradingMode = mode;
+            updateTradingModeDisplay();
+            
+            const paperBtn = document.getElementById('paperModeBtn');
+            const liveBtn = document.getElementById('liveModeBtn');
+            
+            if (mode === 'paper') {
+                paperBtn.className = 'btn btn-primary';
+                liveBtn.className = 'btn btn-secondary';
+                showSuccessMessage('📊 Switched to Paper Trading Mode - All trades are simulated');
+            } else {
+                paperBtn.className = 'btn btn-secondary';
+                liveBtn.className = 'btn btn-primary';
+                showSuccessMessage('🔴 Switched to Live Trading Mode - Real money trades');
+            }
+            
+            // Store in session
+            sessionStorage.setItem('tradingMode', mode);
+        }
+
+        function updateTradingModeDisplay() {
+            const indicator = document.getElementById('tradingModeIndicator');
+            if (indicator) {
+                if (currentTradingMode === 'paper') {
+                    indicator.textContent = 'PAPER';
+                    indicator.style.background = '#3b82f6';
+                } else {
+                    indicator.textContent = 'LIVE';
+                    indicator.style.background = 'var(--accent-color)';
+                }
+            }
+        }
+
+        // Advanced Order Management
+        function showAdvancedOrder(symbol, action, price) {
+            const orderModal = document.createElement('div');
+            orderModal.className = 'modal';
+            orderModal.style.display = 'block';
+            orderModal.innerHTML = `
+                <div class="modal-content" style="max-width: 600px;">
+                    <span class="close" onclick="this.parentElement.parentElement.remove()">&times;</span>
+                    <h3>Advanced Order - ${symbol}</h3>
+                    <div style="background: rgba(0,0,0,0.05); padding: 15px; border-radius: 8px; margin: 20px 0;">
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Symbol</label>
+                                <input type="text" value="${symbol}" readonly style="width: 100%; padding: 10px; border: 1px solid rgba(0,0,0,0.2); border-radius: 5px; background: #f5f5f5;">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Action</label>
+                                <select style="width: 100%; padding: 10px; border: 1px solid rgba(0,0,0,0.2); border-radius: 5px;">
+                                    <option ${action === 'BUY' ? 'selected' : ''}>${action}</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Quantity</label>
+                                <input type="number" value="1" min="1" style="width: 100%; padding: 10px; border: 1px solid rgba(0,0,0,0.2); border-radius: 5px;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin: 20px 0;">
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-weight: 500;">Order Type</label>
+                            <select id="orderType" onchange="toggleOrderFields()" style="width: 100%; padding: 10px; border: 1px solid rgba(0,0,0,0.2); border-radius: 5px;">
+                                <option value="market">Market Order</option>
+                                <option value="limit">Limit Order</option>
+                                <option value="stop">Stop Loss Order</option>
+                                <option value="stop-limit">Stop Limit Order</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-weight: 500;">Price</label>
+                            <input type="number" value="${price}" step="0.01" style="width: 100%; padding: 10px; border: 1px solid rgba(0,0,0,0.2); border-radius: 5px;">
+                        </div>
+                    </div>
+                    
+                    <div style="background: rgba(6, 214, 160, 0.1); padding: 15px; border-radius: 8px; margin: 20px 0;">
+                        <h4 style="margin-bottom: 15px; color: var(--accent-color);">📊 Advanced Options</h4>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                            <div>
+                                <label style="display: flex; align-items: center; gap: 10px;">
+                                    <input type="checkbox" id="enableTrailingStop">
+                                    <span>Enable Trailing Stop Loss</span>
+                                </label>
+                                <div id="trailingStopOptions" style="margin-top: 10px; display: none;">
+                                    <input type="number" placeholder="Trail %" value="3" step="0.5" style="width: 80px; padding: 8px; border: 1px solid rgba(0,0,0,0.2); border-radius: 5px;">
+                                </div>
+                            </div>
+                            <div>
+                                <label style="display: flex; align-items: center; gap: 10px;">
+                                    <input type="checkbox">
+                                    <span>Iceberg Order</span>
+                                </label>
+                                <input type="number" placeholder="Visible Qty" style="width: 100px; padding: 8px; border: 1px solid rgba(0,0,0,0.2); border-radius: 5px; margin-top: 5px;">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 15px; justify-content: center; margin-top: 30px;">
+                        <button class="btn btn-primary" onclick="executeAdvancedOrder('${symbol}', '${action}', ${price}); this.parentElement.parentElement.parentElement.remove();">Execute Order</button>
+                        <button class="btn btn-secondary" onclick="this.parentElement.parentElement.parentElement.remove();">Cancel</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(orderModal);
+        }
+
+        function executeAdvancedOrder(symbol, action, price) {
+            const mode = currentTradingMode === 'paper' ? 'Paper' : 'Live';
+            showSuccessMessage(`🚀 ${mode} ${action} order for ${symbol} placed successfully!`);
+            
+            // Simulate order execution
+            setTimeout(() => {
+                showSuccessMessage(`✅ ${action} order for ${symbol} executed at ₹${price}`);
+                updatePortfolioValue();
+            }, 2000);
+        }
+
+        // Trailing Stop Loss Management
+        function toggleTrailingStop() {
+            const toggle = document.getElementById('trailingStopToggle');
+            const settings = document.getElementById('trailingStopSettings');
+            
+            if (toggle.checked) {
+                settings.style.display = 'block';
+                trailingStopEnabled = true;
+                showSuccessMessage('📈 Trailing Stop Loss enabled');
+            } else {
+                settings.style.display = 'none';
+                trailingStopEnabled = false;
+                showSuccessMessage('📉 Trailing Stop Loss disabled');
+            }
+        }
+
+        // Quick Trading Functions
+        function quickBuy() {
+            showQuickTradeModal('BUY');
+        }
+
+        function quickSell() {
+            showQuickTradeModal('SELL');
+        }
+
+        function showQuickTradeModal(action) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'block';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 400px;">
+                    <span class="close" onclick="this.parentElement.parentElement.remove()">&times;</span>
+                    <h3>Quick ${action}</h3>
+                    <div style="margin: 20px 0;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500;">Symbol</label>
+                        <input type="text" id="quickSymbol" placeholder="e.g. RELIANCE" style="width: 100%; padding: 12px; border: 1px solid rgba(0,0,0,0.2); border-radius: 8px;">
+                    </div>
+                    <div style="margin: 20px 0;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500;">Quantity</label>
+                        <input type="number" id="quickQuantity" value="1" min="1" style="width: 100%; padding: 12px; border: 1px solid rgba(0,0,0,0.2); border-radius: 8px;">
+                    </div>
+                    <div style="background: rgba(0,0,0,0.05); padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center;">
+                        <div style="font-size: 0.9rem; color: var(--text-light);">Trading Mode</div>
+                        <div style="font-weight: bold; color: ${currentTradingMode === 'paper' ? '#3b82f6' : 'var(--accent-color)'};">${currentTradingMode === 'paper' ? '📊 PAPER TRADING' : '🔴 LIVE TRADING'}</div>
+                    </div>
+                    <button class="btn btn-primary" onclick="executeQuickTrade('${action}'); this.parentElement.parentElement.remove();" style="width: 100%;">Execute ${action}</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function executeQuickTrade(action) {
+            const symbol = document.getElementById('quickSymbol').value;
+            const quantity = document.getElementById('quickQuantity').value;
+            
+            if (!symbol) {
+                showSuccessMessage('❌ Please enter a symbol');
+                return;
+            }
+            
+            const mode = currentTradingMode === 'paper' ? 'Paper' : 'Live';
+            showSuccessMessage(`🚀 ${mode} ${action} order for ${quantity} shares of ${symbol} submitted!`);
+            
+            setTimeout(() => {
+                const randomPrice = (Math.random() * 1000 + 1000).toFixed(2);
+                showSuccessMessage(`✅ ${action} order executed at ₹${randomPrice}`);
+                updatePortfolioValue();
+            }, 1500);
+        }
+
+        // Paper Trading Functions
+        function resetPaperAccount() {
+            if (confirm('Are you sure you want to reset your paper trading account? This will clear all positions and reset to ₹10,00,000.')) {
+                showSuccessMessage('📊 Paper trading account reset successfully!');
+                // Reset values in UI
+                setTimeout(() => {
+                    showSuccessMessage('💰 Virtual portfolio reset to ₹10,00,000');
+                }, 1000);
+            }
+        }
+
+        function updatePaperChart(period) {
+            // Update chart period buttons
+            document.querySelectorAll('.chart-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.background = 'transparent';
+                btn.style.color = 'var(--primary-color)';
+            });
+            
+            event.target.classList.add('active');
+            event.target.style.background = 'var(--primary-color)';
+            event.target.style.color = 'white';
+            
+            showSuccessMessage(`📈 Chart updated to ${period} view`);
+        }
+
+        // Strategy Builder Functions
+        let currentBuilderStep = 1;
+
+        function nextStep() {
+            if (currentBuilderStep < 4) {
+                currentBuilderStep++;
+                updateBuilderStep();
+            }
+        }
+
+        function prevStep() {
+            if (currentBuilderStep > 1) {
+                currentBuilderStep--;
+                updateBuilderStep();
+            }
+        }
+
+        function updateBuilderStep() {
+            // Update step indicators
+            document.querySelectorAll('.step').forEach((step, index) => {
+                if (index + 1 <= currentBuilderStep) {
+                    step.style.background = 'var(--primary-color)';
+                    step.style.color = 'white';
+                } else {
+                    step.style.background = '#e5e7eb';
+                    step.style.color = '#6b7280';
+                }
+            });
+            
+            // Show/hide navigation buttons
+            const prevBtn = document.querySelector('.btn-secondary');
+            if (currentBuilderStep === 1) {
+                prevBtn.style.visibility = 'hidden';
+            } else {
+                prevBtn.style.visibility = 'visible';
+            }
+            
+            showSuccessMessage(`📝 Step ${currentBuilderStep} of 4`);
+        }
+
+        function loadStrategyTemplate(templateType) {
+            let templateName, description;
+            
+            switch(templateType) {
+                case 'momentum':
+                    templateName = 'Momentum Trading Strategy';
+                    description = 'Trend-following strategy using RSI > 70 for buy signals and RSI < 30 for sell signals, combined with MACD bullish/bearish crossovers';
+                    break;
+                case 'mean-reversion':
+                    templateName = 'Mean Reversion Strategy';
+                    description = 'Counter-trend strategy using Bollinger Bands. Buy when price touches lower band, sell when price touches upper band';
+                    break;
+                case 'scalping':
+                    templateName = 'Scalping Strategy';
+                    description = 'High-frequency trading strategy for quick profits using 1-minute charts and tight stop losses';
+                    break;
+            }
+            
+            // Populate form
+            document.getElementById('strategyName').value = templateName;
+            document.getElementById('strategyDescription').value = description;
+            
+            showSuccessMessage(`📋 ${templateName} template loaded successfully!`);
+        }
+
+        function previewStrategy() {
+            const name = document.getElementById('strategyName').value;
+            const market = document.getElementById('strategyMarket').value;
+            const timeframe = document.getElementById('strategyTimeframe').value;
+            
+            if (!name) {
+                showSuccessMessage('❌ Please enter a strategy name');
+                return;
+            }
+            
+            showSuccessMessage(`👀 Previewing: ${name} (${market} - ${timeframe})`);
+        }
+
+        function saveStrategy() {
+            const name = document.getElementById('strategyName').value;
+            if (!name) {
+                showSuccessMessage('❌ Please enter a strategy name');
+                return;
+            }
+            
+            showSuccessMessage(`💾 Strategy "${name}" saved successfully!`);
+        }
+
+        function loadTemplate() {
+            showSuccessMessage('📄 Strategy template selector opened');
+        }
+
+        // Portfolio Functions
+        function viewPositions() {
+            showSuccessMessage('📊 Opening positions overview...');
+        }
+
+        function marketWatch() {
+            showSuccessMessage('👀 Opening market watchlist...');
+        }
+
+        // Settings Functions
+        function saveAllSettings() {
+            showSuccessMessage('💾 All settings saved successfully!');
+            
+            // Save to session storage
+            const settings = {
+                tradingMode: currentTradingMode,
+                trailingStopEnabled: trailingStopEnabled,
+                timestamp: new Date().toISOString()
+            };
+            
+            sessionStorage.setItem('tradingSettings', JSON.stringify(settings));
+        }
+
+        // Enhanced signal refresh
+        function refreshSignals() {
+            showSuccessMessage('🔄 Refreshing live signals...');
+            
+            setTimeout(() => {
+                generateNewSignal();
+                showSuccessMessage('✅ Signals updated with latest market data');
+            }, 1500);
+        }
+
+        // Advanced Order Management Functions
+        function handleOrderTypeChange() {
+            const orderType = document.getElementById('orderTypeSelect').value;
+            const trailingSection = document.getElementById('trailingStopSection');
+            
+            if (orderType === 'trailing-stop') {
+                trailingSection.style.display = 'block';
+            } else {
+                trailingSection.style.display = 'none';
+            }
+            
+            updateOrderEstimate();
+        }
+
+        function updateOrderEstimate() {
+            const quantity = document.getElementById('orderQuantity')?.value || 1;
+            const price = document.getElementById('orderPrice')?.value || 1000;
+            
+            const estimatedCost = quantity * price;
+            const brokerageFee = 20; // Fixed for demo
+            const totalAmount = estimatedCost + brokerageFee;
+            
+            const costElement = document.getElementById('estimatedCost');
+            const totalElement = document.getElementById('totalAmount');
+            
+            if (costElement) costElement.textContent = `₹${estimatedCost.toLocaleString()}`;
+            if (totalElement) totalElement.textContent = `₹${totalAmount.toLocaleString()}`;
+        }
+
+        function submitAdvancedOrder() {
+            const symbol = document.getElementById('orderSymbol').value;
+            const orderType = document.getElementById('orderTypeSelect').value;
+            const quantity = document.getElementById('orderQuantity').value;
+            const price = document.getElementById('orderPrice').value;
+            
+            if (!symbol || !quantity || !price) {
+                showSuccessMessage('❌ Please fill all required fields');
+                return;
+            }
+            
+            const mode = currentTradingMode === 'paper' ? 'Paper' : 'Live';
+            showSuccessMessage(`🚀 ${mode} ${orderType} order for ${quantity} ${symbol} submitted!`);
+            
+            setTimeout(() => {
+                showSuccessMessage(`✅ Order executed successfully at ₹${price}`);
+                updatePortfolioValue();
+                closeModal('advancedOrderModal');
+            }, 2000);
+        }
+
+        // Portfolio Management Functions
+        function viewPositions() {
+            showModal('portfolioModal');
+        }
+
+        function showPositionType(type) {
+            // Update button states
+            document.querySelectorAll('#portfolioModal .btn-sm').forEach(btn => {
+                btn.className = 'btn btn-secondary btn-sm';
+            });
+            event.target.className = 'btn btn-primary btn-sm';
+            
+            showSuccessMessage(`📊 Showing ${type} positions`);
+        }
+
+        function closePosition(symbol, quantity) {
+            if (confirm(`Are you sure you want to close ${quantity} shares of ${symbol}?`)) {
+                const mode = currentTradingMode === 'paper' ? 'Paper' : 'Live';
+                showSuccessMessage(`🔄 ${mode} closing position for ${symbol}...`);
+                
+                setTimeout(() => {
+                    showSuccessMessage(`✅ Position closed successfully`);
+                    updatePortfolioValue();
+                }, 1500);
+            }
+        }
+
+        // Market Watch Functions
+        function marketWatch() {
+            showModal('marketWatchModal');
+        }
+
+        function addToWatchlist() {
+            const symbol = document.getElementById('watchlistInput').value.toUpperCase();
+            if (!symbol) return;
+            
+            // Simulate adding to watchlist
+            const tableBody = document.getElementById('watchlistTableBody');
+            const randomPrice = (Math.random() * 1000 + 1000).toFixed(2);
+            const randomChange = (Math.random() * 50 - 25).toFixed(2);
+            const randomPercent = ((randomChange / randomPrice) * 100).toFixed(2);
+            const changeColor = randomChange >= 0 ? 'var(--accent-color)' : '#ef4444';
+            
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td style="padding: 12px; border-bottom: 1px solid rgba(0,0,0,0.1);"><strong>${symbol}</strong></td>
+                <td style="padding: 12px; text-align: right; border-bottom: 1px solid rgba(0,0,0,0.1);">₹${randomPrice}</td>
+                <td style="padding: 12px; text-align: right; border-bottom: 1px solid rgba(0,0,0,0.1); color: ${changeColor};">${randomChange >= 0 ? '+' : ''}₹${randomChange}</td>
+                <td style="padding: 12px; text-align: right; border-bottom: 1px solid rgba(0,0,0,0.1); color: ${changeColor};">${randomChange >= 0 ? '+' : ''}${randomPercent}%</td>
+                <td style="padding: 12px; text-align: right; border-bottom: 1px solid rgba(0,0,0,0.1);">${Math.floor(Math.random() * 100000)}</td>
+                <td style="padding: 12px; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.1);">
+                    <button class="btn btn-primary btn-sm" onclick="quickTradeFromWatch('${symbol}', ${randomPrice})">Trade</button>
+                </td>
+            `;
+            
+            tableBody.appendChild(newRow);
+            document.getElementById('watchlistInput').value = '';
+            showSuccessMessage(`📈 ${symbol} added to watchlist`);
+        }
+
+        function quickTradeFromWatch(symbol, price) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'block';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 500px;">
+                    <span class="close" onclick="this.parentElement.parentElement.remove()">&times;</span>
+                    <h3>Quick Trade - ${symbol}</h3>
+                    <div style="background: var(--light-bg); padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary-color);">₹${price}</div>
+                        <div style="font-size: 0.9rem; color: var(--text-light);">Current Price</div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Quantity</label>
+                            <input type="number" id="quickTradeQty" value="1" min="1" style="width: 100%; padding: 10px; border: 1px solid rgba(0,0,0,0.2); border-radius: 5px;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Order Type</label>
+                            <select id="quickOrderType" style="width: 100%; padding: 10px; border: 1px solid rgba(0,0,0,0.2); border-radius: 5px;">
+                                <option>Market</option>
+                                <option>Limit</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.05); padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center;">
+                        <div style="font-size: 0.9rem; color: var(--text-light);">Trading Mode</div>
+                        <div style="font-weight: bold; color: ${currentTradingMode === 'paper' ? '#3b82f6' : 'var(--accent-color)'};">${currentTradingMode === 'paper' ? '📊 PAPER TRADING' : '🔴 LIVE TRADING'}</div>
+                    </div>
+                    <div style="display: flex; gap: 15px;">
+                        <button class="btn btn-primary" onclick="executeQuickTradeFromWatch('${symbol}', 'BUY', ${price}); this.parentElement.parentElement.parentElement.remove();" style="flex: 1;">BUY</button>
+                        <button class="btn" onclick="executeQuickTradeFromWatch('${symbol}', 'SELL', ${price}); this.parentElement.parentElement.parentElement.remove();" style="flex: 1; background: #ef4444; color: white;">SELL</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function executeQuickTradeFromWatch(symbol, action, price) {
+            const quantity = document.getElementById('quickTradeQty')?.value || 1;
+            const orderType = document.getElementById('quickOrderType')?.value || 'Market';
+            
+            const mode = currentTradingMode === 'paper' ? 'Paper' : 'Live';
+            showSuccessMessage(`🚀 ${mode} ${action} order for ${quantity} ${symbol} at ₹${price}!`);
+            
+            setTimeout(() => {
+                showSuccessMessage(`✅ ${action} order executed successfully`);
+                updatePortfolioValue();
+            }, 1500);
+        }
+
+        // Enhanced Strategy Functions with more features
+        function loadStrategyTemplate(templateType) {
+            let templateData;
+            
+            switch(templateType) {
+                case 'momentum':
+                    templateData = {
+                        name: 'Advanced Momentum Strategy',
+                        description: 'Multi-timeframe momentum strategy using RSI(14) > 70 for buy signals, MACD bullish crossover confirmation, and volume spike detection. Includes trailing stop loss and position sizing based on ATR.',
+                        market: 'stocks',
+                        timeframe: '15m',
+                        riskPerTrade: 2,
+                        maxPositions: 3
+                    };
+                    break;
+                case 'mean-reversion':
+                    templateData = {
+                        name: 'Mean Reversion Master',
+                        description: 'Counter-trend strategy using Bollinger Bands (20,2) with RSI oversold/overbought conditions. Entry on band touch with RSI < 30 or > 70, exit on mean reversion to 20 SMA.',
+                        market: 'forex',
+                        timeframe: '1h',
+                        riskPerTrade: 1.5,
+                        maxPositions: 5
+                    };
+                    break;
+                case 'scalping':
+                    templateData = {
+                        name: 'High-Frequency Scalping',
+                        description: 'Ultra-fast scalping strategy for 1-minute charts using EMA crossovers (5,13), Stochastic oscillator, and level 2 order book analysis. Tight stop losses and quick profit targets.',
+                        market: 'forex',
+                        timeframe: '1m',
+                        riskPerTrade: 0.5,
+                        maxPositions: 10
+                    };
+                    break;
+            }
+            
+            // Populate form fields
+            if (templateData) {
+                document.getElementById('strategyName').value = templateData.name;
+                document.getElementById('strategyDescription').value = templateData.description;
+                document.getElementById('strategyMarket').value = templateData.market;
+                document.getElementById('strategyTimeframe').value = templateData.timeframe;
+                
+                showSuccessMessage(`📋 ${templateData.name} template loaded successfully!`);
+                
+                // Add visual feedback to template card
+                event.target.style.border = '2px solid var(--accent-color)';
+                event.target.style.background = 'rgba(6, 214, 160, 0.05)';
+                
+                setTimeout(() => {
+                    event.target.style.border = '2px solid rgba(0,0,0,0.1)';
+                    event.target.style.background = 'white';
+                }, 2000);
+            }
+        }
+
+        // Enhanced Settings Functions
+        function saveAllSettings() {
+            // Collect all settings
+            const settings = {
+                tradingMode: currentTradingMode,
+                trailingStopEnabled: document.getElementById('trailingStopToggle')?.checked || false,
+                riskPerTrade: document.querySelector('#settingsTab input[value="2"]')?.value || 2,
+                dailyLossLimit: document.querySelector('#settingsTab input[value="5000"]')?.value || 5000,
+                autoExecuteSignals: document.querySelector('#settingsTab input[type="checkbox"]:checked') !== null,
+                timestamp: new Date().toISOString()
+            };
+            
+            // Save to session storage
+            sessionStorage.setItem('tradingSettings', JSON.stringify(settings));
+            
+            showSuccessMessage('💾 All settings saved successfully!');
+            
+            // Visual feedback
+            const saveBtn = event.target;
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = '✅ Saved!';
+            saveBtn.style.background = 'var(--accent-color)';
+            
+            setTimeout(() => {
+                saveBtn.textContent = originalText;
+                saveBtn.style.background = 'var(--primary-color)';
+            }, 2000);
+        }
+
+        // Risk Management Functions
+        function calculatePositionSize(accountBalance, riskPercent, entryPrice, stopLoss) {
+            const riskAmount = accountBalance * (riskPercent / 100);
+            const riskPerShare = Math.abs(entryPrice - stopLoss);
+            return Math.floor(riskAmount / riskPerShare);
+        }
+
+        function validateRiskLimits(symbol, quantity, price) {
+            const accountBalance = 452850; // Current portfolio value
+            const maxRiskPerTrade = 2; // 2% from settings
+            const positionValue = quantity * price;
+            const riskPercent = (positionValue / accountBalance) * 100;
+            
+            if (riskPercent > maxRiskPerTrade) {
+                showSuccessMessage(`⚠️ Risk warning: Position exceeds ${maxRiskPerTrade}% limit`);
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Real-time Portfolio Updates
+        function startAdvancedUpdates() {
+            setInterval(() => {
+                if (document.getElementById('tradingDashboard').style.display === 'block') {
+                    // Update portfolio values with realistic market movements
+                    updateRealTimePortfolio();
+                    
+                    // Update positions table if visible
+                    updatePositionsDisplay();
+                    
+                    // Update market watch if visible
+                    updateMarketWatchDisplay();
+                    
+                    // Generate new signals occasionally
+                    if (Math.random() < 0.1) { // 10% chance every update
+                        generateAdvancedSignal();
+                    }
+                }
+            }, 5000); // Update every 5 seconds
+        }
+
+        function updateRealTimePortfolio() {
+            const portfolioElement = document.querySelector('.balance-display');
+            const changeElement = document.querySelector('.balance-change');
+            
+            if (portfolioElement && changeElement) {
+                const currentValue = 452850;
+                const dailyChange = (Math.random() - 0.48) * 5000; // Slight upward bias
+                const newValue = currentValue + dailyChange;
+                const changePercent = ((dailyChange / currentValue) * 100).toFixed(2);
+                
+                portfolioElement.textContent = `₹${newValue.toLocaleString()}`;
+                changeElement.textContent = `${dailyChange >= 0 ? '+' : ''}₹${Math.abs(dailyChange).toFixed(0)} (${changePercent}%)`;
+                changeElement.className = `balance-change ${dailyChange >= 0 ? 'positive' : 'negative'}`;
+                
+                // Update portfolio value in header
+                const headerValue = document.getElementById('portfolioValue');
+                if (headerValue) {
+                    headerValue.textContent = `₹${newValue.toLocaleString()}`;
+                }
+            }
+        }
+
+        function generateAdvancedSignal() {
+            const symbols = ['INFY', 'WIPRO', 'HCL TECH', 'LT', 'BAJAJ FINANCE', 'AXIS BANK'];
+            const actions = ['BUY', 'SELL'];
+            const confidenceRatings = [92, 88, 94, 76, 89, 91];
+            
+            const randomIndex = Math.floor(Math.random() * symbols.length);
+            const symbol = symbols[randomIndex];
+            const action = actions[Math.floor(Math.random() * actions.length)];
+            const confidence = confidenceRatings[Math.floor(Math.random() * confidenceRatings.length)];
+            
+            // Only add if signals tab is active
+            const signalsTab = document.getElementById('signalsTab');
+            if (signalsTab && signalsTab.style.display !== 'none') {
+                const signalsList = signalsTab.querySelector('.signals-list');
+                if (signalsList) {
+                    const newSignal = createAdvancedSignalElement(symbol, action, confidence);
+                    signalsList.insertBefore(newSignal, signalsList.firstChild);
+                    
+                    // Limit to 5 signals
+                    if (signalsList.children.length > 5) {
+                        signalsList.removeChild(signalsList.lastChild);
+                    }
+                    
+                    showSuccessMessage(`🔔 New ${confidence}% confidence ${action} signal for ${symbol}!`);
+                }
+            }
+        }
+
+        function createAdvancedSignalElement(symbol, action, confidence) {
+            const signalDiv = document.createElement('div');
+            signalDiv.className = 'signal-item new';
+            signalDiv.style.cssText = `
+                background: white; 
+                padding: 25px; 
+                border-radius: 15px; 
+                box-shadow: 0 5px 20px rgba(0,0,0,0.1); 
+                border-left: 4px solid ${action === 'BUY' ? 'var(--accent-color)' : '#ef4444'}; 
+                animation: slideIn 0.5s ease;
+            `;
+            
+            const price = (Math.random() * 2000 + 1000).toFixed(2);
+            const target1 = (parseFloat(price) * (action === 'BUY' ? 1.025 : 0.975)).toFixed(2);
+            const target2 = (parseFloat(price) * (action === 'BUY' ? 1.05 : 0.95)).toFixed(2);
+            const stopLoss = (parseFloat(price) * (action === 'BUY' ? 0.975 : 1.025)).toFixed(2);
+            
+            const indicators = ['RSI: ' + Math.floor(Math.random() * 30 + 50), 'MACD: ' + (Math.random() > 0.5 ? 'Bullish' : 'Bearish'), 'Volume: ' + (Math.random() > 0.5 ? 'High' : 'Normal')];
+            
+            signalDiv.innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 20px; align-items: center;">
+                    <div>
+                        <div style="font-size: 1.2rem; font-weight: bold;">${symbol} <span style="background: var(--primary-color); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem;">NSE</span></div>
+                        <div style="color: ${action === 'BUY' ? 'var(--accent-color)' : '#ef4444'}; font-weight: 600; text-transform: uppercase;">${action} SIGNAL</div>
+                        <div style="font-size: 0.8rem; color: var(--text-light);">Just now</div>
+                        <div style="font-size: 0.8rem; color: var(--accent-color); font-weight: 600;">Confidence: ${confidence}%</div>
+                    </div>
+                    <div>
+                        <div style="font-weight: 600; margin-bottom: 10px;">Entry: ₹${price}</div>
+                        <div style="display: flex; gap: 15px; font-size: 0.9rem; color: var(--text-light); margin-bottom: 8px;">
+                            <span>Target 1: ₹${target1}</span>
+                            <span>Target 2: ₹${target2}</span>
+                            <span>Stop Loss: ₹${stopLoss}</span>
+                        </div>
+                        <div style="display: flex; gap: 15px; font-size: 0.8rem;">
+                            ${indicators.map(ind => `<span style="background: rgba(0,0,0,0.05); padding: 4px 8px; border-radius: 4px;">${ind}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <button class="btn btn-primary" style="margin-bottom: 10px; padding: 8px 16px;" onclick="showAdvancedOrder('${symbol}', '${action}', ${price})">Advanced Order</button>
+                        <button class="btn btn-secondary" style="padding: 8px 16px; margin-bottom: 10px;" onclick="executeSignal('${symbol}', '${action}')">Quick Execute</button>
+                        <button class="btn" style="background: #6b7280; color: white; padding: 8px 16px;" onclick="skipSignal(this)">Skip</button>
+                    </div>
+                </div>
+            `;
+            
+            return signalDiv;
+        }
+
+        // Initialize advanced features when dashboard loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load saved settings
+            const savedSettings = sessionStorage.getItem('tradingSettings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                currentTradingMode = settings.tradingMode || 'paper';
+                trailingStopEnabled = settings.trailingStopEnabled || false;
+            }
+            
+            // Start advanced updates
+            setTimeout(() => {
+                startAdvancedUpdates();
+            }, 2000);
+            
+            // Add event listeners for order estimation
+            document.addEventListener('input', function(e) {
+                if (e.target.id === 'orderQuantity' || e.target.id === 'orderPrice') {
+                    updateOrderEstimate();
+                }
+            });
+            
+            // Add checkbox change handlers
+            document.addEventListener('change', function(e) {
+                if (e.target.id === 'icebergOrder') {
+                    const settings = document.getElementById('icebergSettings');
+                    settings.style.display = e.target.checked ? 'block' : 'none';
+                }
+                
+                if (e.target.id === 'timeInForce') {
+                    const settings = document.getElementById('tifSettings');
+                    settings.style.display = e.target.checked ? 'block' : 'none';
+                }
+                
+                if (e.target.id === 'bracketOrder') {
+                    const settings = document.getElementById('bracketSettings');
+                    settings.style.display = e.target.checked ? 'block' : 'none';
+                }
+                
+                if (e.target.id === 'enableTrailingStop') {
+                    const options = document.getElementById('trailingStopOptions');
+                    options.style.display = e.target.checked ? 'block' : 'none';
+                }
+            });
+            
+            console.log('🚀 Advanced TradingPro Dashboard fully loaded!');
+        });
+
+        // Welcome sequence for new users
+        function showWelcomeSequence() {
+            const messages = [
+                '🎉 Welcome to TradingPro Advanced Dashboard!',
+                '📊 Paper Trading is enabled by default for safe testing',
+                '🔔 Live signals are generating automatically',
+                '⚙️ Check out the Strategy Builder for custom algorithms',
+                '📈 All features are ready - Happy Trading!'
+            ];
+            
+            messages.forEach((message, index) => {
+                setTimeout(() => {
+                    showSuccessMessage(message);
+                }, index * 2000);
+            });
+        }
+
+        // Enhanced dashboard initialization
+        const originalShowTradingDashboard = showTradingDashboard;
+        showTradingDashboard = function(user) {
+            originalShowTradingDashboard(user);
+            
+            // Show welcome sequence for new users
+            setTimeout(() => {
+                showWelcomeSequence();
+            }, 1000);
+            
+            // Initialize advanced features
+            updateTradingModeDisplay();
+            startAdvancedUpdates();
+        };
+
+        // Trading Functions
+        function executeSignal(symbol, action) {
+            showSuccessMessage(`🚀 Executing ${action} signal for ${symbol}...`);
+            
+            // Simulate execution
+            setTimeout(() => {
+                showSuccessMessage(`✅ ${action} order for ${symbol} executed successfully!`);
+                updatePortfolioValue();
+            }, 2000);
+        }
+
+        function skipSignal(button) {
+            const signalItem = button.closest('.signal-item');
+            signalItem.style.opacity = '0.5';
+            button.textContent = 'Skipped';
+            button.disabled = true;
+        }
+
+        function pauseStrategy(strategyId) {
+            showSuccessMessage(`⏸️ Strategy paused successfully`);
+            // Update UI to show paused state
+            const strategyCard = event.target.closest('.strategy-card');
+            const statusBadge = strategyCard.querySelector('.status-badge');
+            statusBadge.textContent = '● PAUSED';
+            statusBadge.style.background = 'rgba(239, 68, 68, 0.2)';
+            statusBadge.style.color = '#ef4444';
+            
+            event.target.textContent = 'Resume';
+            event.target.onclick = () => resumeStrategy(strategyId);
+        }
+
+        function resumeStrategy(strategyId) {
+            showSuccessMessage(`▶️ Strategy resumed successfully`);
+            // Update UI to show running state
+            const strategyCard = event.target.closest('.strategy-card');
+            const statusBadge = strategyCard.querySelector('.status-badge');
+            statusBadge.textContent = '● RUNNING';
+            statusBadge.style.background = 'rgba(6, 214, 160, 0.2)';
+            statusBadge.style.color = 'var(--accent-color)';
+            
+            event.target.textContent = 'Pause';
+            event.target.onclick = () => pauseStrategy(strategyId);
+        }
+
+        function createNewStrategy() {
+            showSuccessMessage('🔧 Strategy Builder would open here');
+        }
+
+        function viewStrategy(strategyId) {
+            showSuccessMessage(`📊 Viewing details for strategy: ${strategyId}`);
+        }
+
+        function addBroker() {
+            showSuccessMessage('🔗 Add broker form would open here');
+        }
+
+        function syncBroker(brokerId) {
+            showSuccessMessage(`🔄 Syncing ${brokerId} data...`);
+            setTimeout(() => {
+                showSuccessMessage(`✅ ${brokerId} data synced successfully!`);
+            }, 2000);
+        }
+
+        function disconnectBroker(brokerId) {
+            if (confirm(`Are you sure you want to disconnect ${brokerId}?`)) {
+                showSuccessMessage(`❌ ${brokerId} disconnected`);
+            }
+        }
+
+        // Update portfolio value with animation
+        function updatePortfolioValue() {
+            const portfolioElement = document.querySelector('#portfolioValue');
+            const balanceElement = document.querySelector('.balance-display');
+            
+            if (portfolioElement && balanceElement) {
+                const currentValue = parseInt(portfolioElement.textContent.replace(/[₹,]/g, ''));
+                const change = Math.random() * 2000 - 1000; // Random change
+                const newValue = currentValue + change;
+                
+                portfolioElement.textContent = `₹${newValue.toLocaleString()}`;
+                balanceElement.textContent = `₹${newValue.toLocaleString()}`;
+                
+                // Animate the change
+                portfolioElement.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    portfolioElement.style.transform = 'scale(1)';
+                }, 300);
+            }
+        }
+
+        // Real-time dashboard updates
+        function startDashboardUpdates() {
+            // Update portfolio every 10 seconds
+            const dashboardInterval = setInterval(() => {
+                if (document.getElementById('tradingDashboard').style.display !== 'block') {
+                    clearInterval(dashboardInterval);
+                    return;
+                }
+                
+                // Simulate market movements
+                updatePortfolioValue();
+                
+                // Update market data in the side panel
+                updateMarketData();
+                
+                // Randomly generate new signals (30% chance)
+                if (Math.random() < 0.3) {
+                    generateNewSignal();
+                }
+            }, 10000);
+        }
+
+        function generateNewSignal() {
+            const symbols = ['TCS', 'INFY', 'WIPRO', 'HCL TECH', 'TECH MAHINDRA'];
+            const actions = ['BUY', 'SELL'];
+            const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+            const randomAction = actions[Math.floor(Math.random() * actions.length)];
+            
+            // Add to signals list if on signals tab
+            const signalsList = document.querySelector('#signalsTab .signals-list');
+            if (signalsList) {
+                const newSignal = createSignalElement(randomSymbol, randomAction);
+                signalsList.insertBefore(newSignal, signalsList.firstChild);
+                
+                // Limit to 5 signals
+                if (signalsList.children.length > 5) {
+                    signalsList.removeChild(signalsList.lastChild);
+                }
+                
+                showSuccessMessage(`🔔 New ${randomAction} signal for ${randomSymbol}!`);
+            }
+        }
+
+        function createSignalElement(symbol, action) {
+            const signalDiv = document.createElement('div');
+            signalDiv.className = 'signal-item';
+            signalDiv.style.cssText = 'background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); border-left: 4px solid ' + (action === 'BUY' ? 'var(--accent-color)' : '#ef4444') + '; animation: slideIn 0.5s ease;';
+            
+            const price = (Math.random() * 2000 + 1000).toFixed(2);
+            const target1 = (parseFloat(price) * (action === 'BUY' ? 1.02 : 0.98)).toFixed(2);
+            const target2 = (parseFloat(price) * (action === 'BUY' ? 1.04 : 0.96)).toFixed(2);
+            const stopLoss = (parseFloat(price) * (action === 'BUY' ? 0.98 : 1.02)).toFixed(2);
+            
+            signalDiv.innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 20px; align-items: center;">
+                    <div>
+                        <div style="font-size: 1.2rem; font-weight: bold;">${symbol}</div>
+                        <div style="color: ${action === 'BUY' ? 'var(--accent-color)' : '#ef4444'}; font-weight: 600; text-transform: uppercase;">${action} SIGNAL</div>
+                        <div style="font-size: 0.8rem; color: var(--text-light);">Just now</div>
+                    </div>
+                    <div>
+                        <div style="font-weight: 600; margin-bottom: 10px;">Entry: ₹${price}</div>
+                        <div style="display: flex; gap: 15px; font-size: 0.9rem; color: var(--text-light);">
+                            <span>Target 1: ₹${target1}</span>
+                            <span>Target 2: ₹${target2}</span>
+                            <span>Stop Loss: ₹${stopLoss}</span>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <button class="btn btn-primary" style="margin-bottom: 10px; padding: 8px 16px;" onclick="executeSignal('${symbol}', '${action}')">Execute</button>
+                        <button class="btn btn-secondary" style="padding: 8px 16px;" onclick="skipSignal(this)">Skip</button>
+                    </div>
+                </div>
+            `;
+            
+            return signalDiv;
+        }
+
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                // Clear session
+                sessionStorage.removeItem('currentUser');
+                
+                // Hide dashboard
+                document.getElementById('tradingDashboard').style.display = 'none';
+                
+                // Show main website content
+                document.getElementById('home').style.display = 'flex';
+                document.getElementById('services').style.display = 'block';
+                document.querySelector('.header').style.display = 'block';
+                
+                showSuccessMessage('👋 Logged out successfully!');
+            }
+        }
+
+        // Check for existing session on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedUser = sessionStorage.getItem('currentUser');
+            if (savedUser) {
+                const user = JSON.parse(savedUser);
+                showTradingDashboard(user);
+            }
+        });
+
+        // Success message function
+        function showSuccessMessage(message) {
+            const successDiv = document.createElement('div');
+            successDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #06d6a0, #00b894);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                z-index: 3000;
+                font-weight: 500;
+                animation: slideIn 0.3s ease;
+                max-width: 350px;
+            `;
+            successDiv.textContent = message;
+            document.body.appendChild(successDiv);
+            
+            setTimeout(() => {
+                successDiv.remove();
+            }, 5000);
+        }
+        function showSuccessMessage(message) {
+            const successDiv = document.createElement('div');
+            successDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #06d6a0, #00b894);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                z-index: 3000;
+                font-weight: 500;
+                animation: slideIn 0.3s ease;
+            `;
+            successDiv.textContent = message;
+            document.body.appendChild(successDiv);
+            
+            setTimeout(() => {
+                successDiv.remove();
+            }, 5000);
+        }
+
+        // Data Feed Toggle
+        function toggleDataFeed() {
+            const feedContent = document.getElementById('feedContent');
+            const minimizeBtn = document.querySelector('.minimize-btn');
+            
+            if (feedContent.style.display === 'none') {
+                feedContent.style.display = 'block';
+                minimizeBtn.textContent = '−';
+            } else {
+                feedContent.style.display = 'none';
+                minimizeBtn.textContent = '+';
+            }
+        }
+
+        // Chat Function
+        function openChat() {
+            alert('Live chat feature would be integrated here!');
+        }
+
+        // Load saved theme on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.querySelector('.theme-toggle i').className = 'fas fa-sun';
+            }
+
+            // Animate elements
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('fade-in-up');
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+
+            // Observe service cards for animation
+            document.querySelectorAll('.service-card').forEach(el => {
+                observer.observe(el);
+            });
+        });
+
+        // Smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Update market data simulation
+        function updateMarketData() {
+            const feedItems = document.querySelectorAll('.feed-item');
+            feedItems.forEach(item => {
+                const priceEl = item.querySelector('.price');
+                const changeEl = item.querySelector('.change');
+                
+                if (priceEl && changeEl) {
+                    // Simulate price changes
+                    const currentPrice = parseFloat(priceEl.textContent.replace(/[^0-9.-]/g, ''));
+                    const change = (Math.random() - 0.5) * 0.02 * currentPrice;
+                    const newPrice = currentPrice + change;
+                    
+                    priceEl.textContent = newPrice.toFixed(priceEl.textContent.includes('.') ? 4 : 2);
+                    
+                    const changePercent = ((change / currentPrice) * 100).toFixed(2);
+                    changeEl.textContent = `${change >= 0 ? '+' : ''}${change.toFixed(change > 1 ? 2 : 4)} (${changePercent}%)`;
+                    changeEl.className = `change ${change >= 0 ? 'positive' : 'negative'}`;
+                }
+            });
+        }
+
+        // Update market data every 3 seconds
+        setInterval(updateMarketData, 3000);
+
+        // Error handling
+        window.addEventListener('error', function(e) {
+            console.log('Script error caught:', e.message);
+        });
+
+        console.log('TradingPro Dashboard loaded successfully!');
+    </script>
+<script>
+function updatePositionsDisplay() {
+    console.log("updatePositionsDisplay function triggered. You can implement your logic here.");
+    // TODO: Add logic to update UI with live positions
+}
+</script><script>
+function updateMarketWatchDisplay() {
+    console.log("updateMarketWatchDisplay function triggered. You can implement your logic here.");
+    // TODO: Add logic to update the market watch display
+}
+</script><script>
+function showDashTab(tabName) {
+    const tabs = document.querySelectorAll('.dash-tab-content');
+    tabs.forEach(tab => tab.style.display = 'none');
+
+    const selectedTab = document.getElementById(tabName + 'Tab');
+    if (selectedTab) {
+        selectedTab.style.display = 'block';
+    }
+
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    tabButtons.forEach(btn => btn.classList.remove('active'));
+
+    const activeBtn = Array.from(tabButtons).find(btn => btn.innerText.replace(/\s+/g, '-').toLowerCase().includes(tabName));
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+    }
+}
+</script><script>
 function showDashTab(tabName) {
     document.querySelectorAll('.dash-tab-content').forEach(el => el.style.display = 'none');
     const activeTab = document.getElementById(tabName + 'Tab');
@@ -2100,13 +3417,17 @@ function showDashTab(tabName) {
 }
 
 function updatePositionsDisplay() {
-    console.log("updatePositionsDisplay function triggered. You can implement your logic here.");
+    console.log("updatePositionsDisplay function triggered.");
 }
 
 function updateMarketWatchDisplay() {
-    console.log("updateMarketWatchDisplay function triggered. You can implement your logic here.");
+    console.log("updateMarketWatchDisplay function triggered.");
 }
-</script><script>
+
+function toggleTheme() {
+    document.body.classList.toggle("dark-mode");
+}
+
 function showModal(id) {
     const modal = document.getElementById(id);
     if (modal) modal.style.display = "block";
@@ -2116,43 +3437,5 @@ function closeModal(id) {
     const modal = document.getElementById(id);
     if (modal) modal.style.display = "none";
 }
-
-function fillDemoCredentials() {
-    const email = document.getElementById("loginEmail");
-    const password = document.getElementById("loginPassword");
-    if (email && password) {
-        email.value = "demo@trading.com";
-        password.value = "demo123";
-    }
-}
-
-function handleLogin(event) {
-    event.preventDefault();
-    alert("Demo login submitted!");
-    closeModal('loginModal');
-}
-
-function toggleTheme() {
-    document.body.classList.toggle("dark-mode");
-}
-</script><script>
-    function handleLogin(event) {
-        event.preventDefault();
-        alert("Demo login submitted!");
-        closeModal('loginModal');
-
-        const dashboard = document.getElementById('tradingDashboard');
-        if (dashboard) {
-            dashboard.style.display = 'block';
-        }
-
-        const hero = document.getElementById('home');
-        if (hero) {
-            hero.style.display = 'none';
-        }
-
-        document.getElementById('dashboardTitle').innerText = "Demo Trader's Dashboard";
-        document.getElementById('userGreeting').innerText = "Welcome back, Demo Trader!";
-    }
-    </script></body>
+</script></body>
 </html>
