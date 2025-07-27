@@ -268,6 +268,51 @@
             gap: 20px;
         }
 
+        /* Strategy Builder */
+        .strategy-builder {
+            display: grid;
+            grid-template-columns: 250px 1fr 300px;
+            gap: 20px;
+            height: 600px;
+        }
+
+        .components-panel {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .canvas-area {
+            background: var(--card-bg);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            border: 2px dashed var(--border-color);
+        }
+
+        .properties-panel {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .component-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: var(--light-bg);
+            border-radius: 6px;
+            cursor: move;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .component-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: var(--primary-color);
+        }
+
         /* Charts */
         .chart-container {
             height: 400px;
@@ -329,37 +374,75 @@
             color: var(--warning-color);
         }
 
-        /* Metrics Cards */
-        .metric-card {
-            text-align: center;
-            padding: 20px;
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
             background: var(--card-bg);
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
+            margin: 5% auto;
+            padding: 30px;
+            width: 90%;
+            max-width: 800px;
+            border-radius: 15px;
+            position: relative;
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
-        .metric-value {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .metric-label {
+        .close {
             color: var(--text-light);
-            font-size: 0.9rem;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            right: 20px;
+            top: 15px;
         }
 
-        .metric-change {
-            font-size: 0.8rem;
-            margin-top: 5px;
+        .close:hover {
+            color: var(--text-dark);
         }
 
-        .positive {
-            color: var(--success-color);
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
         }
 
-        .negative {
-            color: var(--danger-color);
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
         /* Tabs */
@@ -398,38 +481,140 @@
             display: block;
         }
 
-        /* Forms */
-        .form-group {
-            margin-bottom: 20px;
+        /* Metrics Cards */
+        .metric-card {
+            text-align: center;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
         }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--text-dark);
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
         }
 
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid var(--border-color);
+        .metric-label {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .metric-change {
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+
+        .positive {
+            color: var(--success-color);
+        }
+
+        .negative {
+            color: var(--danger-color);
+        }
+
+        /* Code Editor */
+        .code-editor {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
             border-radius: 8px;
+            font-family: 'Courier New', monospace;
             font-size: 14px;
-            transition: border-color 0.3s ease;
+            line-height: 1.5;
+            min-height: 300px;
+            border: 1px solid var(--border-color);
         }
 
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Notifications */
+        @keyframes slideIn {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        .slide-in {
+            animation: slideIn 0.3s ease;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .main-layout {
+                grid-template-columns: 250px 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+                grid-template-areas: 
+                    "header"
+                    "content";
+            }
+            
+            .sidebar {
+                display: none;
+            }
+            
+            .grid-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            
+            .strategy-builder {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto;
+                height: auto;
+            }
+        }
+
+        /* Page-specific styles */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Dark mode toggle */
+        .theme-toggle {
+            background: none;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Notification system */
         .notifications {
             position: fixed;
             top: 20px;
@@ -460,65 +645,33 @@
             border-left: 4px solid var(--warning-color);
         }
 
-        @keyframes slideIn {
-            from { transform: translateX(100%); }
-            to { transform: translateX(0); }
+        /* Coming Soon Styles */
+        .coming-soon {
+            text-align: center;
+            padding: 100px 20px;
+            background: var(--card-bg);
+            border-radius: 15px;
+            border: 2px dashed var(--border-color);
         }
 
-        .pulse {
-            animation: pulse 2s infinite;
+        .coming-soon h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        .coming-soon p {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            margin-bottom: 30px;
         }
 
-        /* Page styles */
-        .page {
-            display: none;
-        }
-
-        .page.active {
-            display: block;
-        }
-
-        /* Theme toggle */
-        .theme-toggle {
-            background: none;
-            border: 2px solid var(--primary-color);
+        .coming-soon i {
+            font-size: 4rem;
             color: var(--primary-color);
-            padding: 8px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .theme-toggle:hover {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .main-layout {
-                grid-template-columns: 1fr;
-                grid-template-areas: 
-                    "header"
-                    "content";
-            }
-            
-            .sidebar {
-                display: none;
-            }
-            
-            .grid-4 {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .grid-3 {
-                grid-template-columns: 1fr;
-            }
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -557,12 +710,6 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#paper-trading" class="nav-link" onclick="showPage('paper-trading')">
-                            <i class="fas fa-file-alt"></i>
-                            <span>Paper Trading</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a href="#strategy-builder" class="nav-link" onclick="showPage('strategy-builder')">
                             <i class="fas fa-code-branch"></i>
                             <span>Strategy Builder</span>
@@ -587,9 +734,45 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="#risk-management" class="nav-link" onclick="showPage('risk-management')">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Risk Management</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="#market-data" class="nav-link" onclick="showPage('market-data')">
                             <i class="fas fa-chart-bar"></i>
                             <span>Market Data</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#research" class="nav-link" onclick="showPage('research')">
+                            <i class="fas fa-flask"></i>
+                            <span>Research Lab</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#optimization" class="nav-link" onclick="showPage('optimization')">
+                            <i class="fas fa-cogs"></i>
+                            <span>Optimization</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#alerts" class="nav-link" onclick="showPage('alerts')">
+                            <i class="fas fa-bell"></i>
+                            <span>Alerts & Signals</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#analytics" class="nav-link" onclick="showPage('analytics')">
+                            <i class="fas fa-analytics"></i>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#paper-trading" class="nav-link" onclick="showPage('paper-trading')">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Paper Trading</span>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -604,6 +787,18 @@
                             <span>Trade Reports</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="#broker-integration" class="nav-link" onclick="showPage('broker-integration')">
+                            <i class="fas fa-plug"></i>
+                            <span>Broker Integration</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#settings" class="nav-link" onclick="showPage('settings')">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
                 </ul>
             </nav>
         </aside>
@@ -615,7 +810,7 @@
                 <div class="page-header">
                     <h1 class="page-title">Trading Dashboard</h1>
                     <div>
-                        <button class="btn btn-primary" onclick="showNotification('Quick strategy feature coming soon!', 'success')">
+                        <button class="btn btn-primary" onclick="showModal('quick-strategy-modal')">
                             <i class="fas fa-plus"></i> Quick Strategy
                         </button>
                         <button class="btn btn-success" onclick="startAllStrategies()">
@@ -683,7 +878,7 @@
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Recent Trades</h3>
-                        <button class="btn btn-sm btn-primary" onclick="showPage('trade-reports')">
+                        <button class="btn btn-sm btn-primary" onclick="showModal('trade-details-modal')">
                             <i class="fas fa-list"></i> View All
                         </button>
                     </div>
@@ -825,74 +1020,171 @@
                 </div>
             </div>
 
-            <!-- Other pages would continue here... -->
+            <!-- Strategy Builder Page -->
             <div id="strategy-builder" class="page">
-                <div class="page-header">
-                    <h1 class="page-title">Strategy Builder</h1>
-                </div>
-                <div class="card">
-                    <h3>Strategy Builder Coming Soon!</h3>
-                    <p>Visual drag-and-drop strategy builder with backtesting capabilities.</p>
+                <div class="coming-soon">
+                    <i class="fas fa-code-branch"></i>
+                    <h2>Strategy Builder</h2>
+                    <p>Advanced visual strategy builder with drag-and-drop components</p>
+                    <div class="btn btn-primary" onclick="showNotification('Strategy Builder coming soon with advanced features!', 'success')">
+                        <i class="fas fa-rocket"></i> Coming Soon
+                    </div>
                 </div>
             </div>
 
+            <!-- Backtesting Page -->
             <div id="backtesting" class="page">
-                <div class="page-header">
-                    <h1 class="page-title">Strategy Backtesting</h1>
-                </div>
-                <div class="card">
-                    <h3>Backtesting Engine Coming Soon!</h3>
-                    <p>Comprehensive backtesting with historical data and performance metrics.</p>
+                <div class="coming-soon">
+                    <i class="fas fa-history"></i>
+                    <h2>Strategy Backtesting</h2>
+                    <p>Comprehensive backtesting engine with historical data analysis</p>
+                    <div class="btn btn-primary" onclick="showNotification('Backtesting engine coming soon!', 'success')">
+                        <i class="fas fa-rocket"></i> Coming Soon
+                    </div>
                 </div>
             </div>
 
+            <!-- Live Trading Page -->
             <div id="live-trading" class="page">
-                <div class="page-header">
-                    <h1 class="page-title">Live Trading</h1>
-                </div>
-                <div class="card">
-                    <h3>Live Trading Interface Coming Soon!</h3>
-                    <p>Real-time trading with broker integration and risk management.</p>
+                <div class="coming-soon">
+                    <i class="fas fa-bolt"></i>
+                    <h2>Live Trading</h2>
+                    <p>Real-time trading with broker integration and risk management</p>
+                    <div class="btn btn-primary" onclick="showNotification('Live trading interface coming soon!', 'success')">
+                        <i class="fas fa-rocket"></i> Coming Soon
+                    </div>
                 </div>
             </div>
 
+            <!-- Portfolio Page -->
             <div id="portfolio" class="page">
-                <div class="page-header">
-                    <h1 class="page-title">Portfolio Management</h1>
-                </div>
-                <div class="card">
-                    <h3>Portfolio Management Coming Soon!</h3>
-                    <p>Comprehensive portfolio tracking and analysis tools.</p>
+                <div class="coming-soon">
+                    <i class="fas fa-briefcase"></i>
+                    <h2>Portfolio Management</h2>
+                    <p>Comprehensive portfolio tracking and analysis tools</p>
+                    <div class="btn btn-primary" onclick="showNotification('Portfolio management coming soon!', 'success')">
+                        <i class="fas fa-rocket"></i> Coming Soon
+                    </div>
                 </div>
             </div>
 
+            <!-- Risk Management Page -->
+            <div id="risk-management" class="page">
+                <div class="coming-soon">
+                    <i class="fas fa-shield-alt"></i>
+                    <h2>Risk Management</h2>
+                    <p>Advanced risk controls and monitoring systems</p>
+                    <div class="btn btn-primary" onclick="showNotification('Risk management tools coming soon!', 'success')">
+                        <i class="fas fa-rocket"></i> Coming Soon
+                    </div>
+                </div>
+            </div>
+
+            <!-- Market Data Page -->
             <div id="market-data" class="page">
-                <div class="page-header">
-                    <h1 class="page-title">Market Data</h1>
-                </div>
-                <div class="card">
-                    <h3>Live Market Data Coming Soon!</h3>
-                    <p>Real-time market data feeds with advanced charting.</p>
+                <div class="coming-soon">
+                    <i class="fas fa-chart-bar"></i>
+                    <h2>Live Market Data</h2>
+                    <p>Real-time market feeds with advanced charting and analysis</p>
+                    <div class="btn btn-primary" onclick="showNotification('Market data feeds coming soon!', 'success')">
+                        <i class="fas fa-rocket"></i> Coming Soon
+                    </div>
                 </div>
             </div>
 
+            <!-- Research Lab Page -->
+            <div id="research" class="page">
+                <div class="coming-soon">
+                    <i class="fas fa-flask"></i>
+                    <h2>Research Laboratory</h2>
+                    <p>Advanced research tools and data analysis capabilities</p>
+                    <div class="btn btn-primary" onclick="showNotification('Research lab coming soon!', 'success')">
+                        <i class="fas fa-rocket"></i> Coming Soon
+                    </div>
+                </div>
+            </div>
+
+            <!-- Optimization Page -->
+            <div id="optimization" class="page">
+                <div class="coming-soon">
+                    <i class="fas fa-cogs"></i>
+                    <h2>Strategy Optimization</h2>
+                    <p>Genetic algorithms and machine learning optimization</p>
+                    <div class="btn btn-primary" onclick="showNotification('Optimization engine coming soon!', 'success')">
+                        <i class="fas fa-rocket"></i> Coming Soon
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerts Page -->
+            <div id="alerts" class="page">
+                <div class="coming-soon">
+                    <i class="fas fa-bell"></i>
+                    <h2>Alerts & Signals</h2>
+                    <p>Smart notifications and trading signals system</p>
+                    <div class="btn btn-primary" onclick="showNotification('Alerts system coming soon!', 'success')">
+                        <i class="fas fa-rocket"></i> Coming Soon
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Page -->
+            <div id="analytics" class="page">
+                <div class="coming-soon">
+                    <i class="fas fa-analytics"></i>
+                    <h2>Advanced Analytics</h2>
+                    <p>Comprehensive performance analytics and reporting</p>
+                    <div class="btn btn-primary" onclick="showNotification('Analytics suite coming soon!', 'success')">
+                        <i class="fas fa-rocket"></i> Coming Soon
+                    </div>
+                </div>
+            </div>
+
+            <!-- Options Trading Page -->
             <div id="options-trading" class="page">
-                <div class="page-header">
-                    <h1 class="page-title">Options Trading</h1>
-                </div>
-                <div class="card">
-                    <h3>Options Trading Platform Coming Soon!</h3>
-                    <p>Advanced options analysis with Greeks and strategy builder.</p>
+                <div class="coming-soon">
+                    <i class="fas fa-chart-pie"></i>
+                    <h2>Options Trading</h2>
+                    <p>Advanced options analysis with Greeks and strategy builder</p>
+                    <div class="btn btn-primary" onclick="showNotification('Options trading platform coming soon!', 'success')">
+                        <i class="fas fa-rocket"></i> Coming Soon
+                    </div>
                 </div>
             </div>
 
+            <!-- Trade Reports Page -->
             <div id="trade-reports" class="page">
-                <div class="page-header">
-                    <h1 class="page-title">Trade Reports</h1>
+                <div class="coming-soon">
+                    <i class="fas fa-file-invoice"></i>
+                    <h2>Trade Reports</h2>
+                    <p>Comprehensive trade analysis and tax reporting tools</p>
+                    <div class="btn btn-primary" onclick="showNotification('Trade reports coming soon!', 'success')">
+                        <i class="fas fa-rocket"></i> Coming Soon
+                    </div>
                 </div>
-                <div class="card">
-                    <h3>Comprehensive Trade Reports Coming Soon!</h3>
-                    <p>Detailed trade analysis and tax reporting tools.</p>
+            </div>
+
+            <!-- Broker Integration Page -->
+            <div id="broker-integration" class="page">
+                <div class="coming-soon">
+                    <i class="fas fa-plug"></i>
+                    <h2>Broker Integration</h2>
+                    <p>Seamless integration with multiple brokers and APIs</p>
+                    <div class="btn btn-primary" onclick="showNotification('Broker integration coming soon!', 'success')">
+                        <i class="fas fa-rocket"></i> Coming Soon
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div id="settings" class="page">
+                <div class="coming-soon">
+                    <i class="fas fa-cog"></i>
+                    <h2>System Settings</h2>
+                    <p>Platform configuration and user preferences</p>
+                    <div class="btn btn-primary" onclick="showNotification('Settings panel coming soon!', 'success')">
+                        <i class="fas fa-rocket"></i> Coming Soon
+                    </div>
                 </div>
             </div>
         </main>
@@ -900,6 +1192,60 @@
 
     <!-- Notification Container -->
     <div class="notifications" id="notifications"></div>
+
+    <!-- Quick Strategy Modal -->
+    <div id="quick-strategy-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('quick-strategy-modal')">&times;</span>
+            <h2>Quick Strategy Creator</h2>
+            <form onsubmit="createQuickStrategy(event)">
+                <div class="form-group">
+                    <label>Strategy Name</label>
+                    <input type="text" required placeholder="My Quick Strategy">
+                </div>
+                <div class="form-group">
+                    <label>Template</label>
+                    <select>
+                        <option>Simple Moving Average Crossover</option>
+                        <option>RSI Overbought/Oversold</option>
+                        <option>Bollinger Band Breakout</option>
+                        <option>MACD Signal</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Symbol</label>
+                    <input type="text" required placeholder="RELIANCE">
+                </div>
+                <div class="form-group">
+                    <label>Timeframe</label>
+                    <select>
+                        <option>1 minute</option>
+                        <option>5 minutes</option>
+                        <option>15 minutes</option>
+                        <option>1 hour</option>
+                        <option>1 day</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Capital Allocation (₹)</label>
+                    <input type="number" value="50000" required>
+                </div>
+                <div style="text-align: center; margin-top: 30px;">
+                    <button type="submit" class="btn btn-primary">Create Strategy</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('quick-strategy-modal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Trade Details Modal -->
+    <div id="trade-details-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('trade-details-modal')">&times;</span>
+            <h2>All Trades</h2>
+            <p>Comprehensive trade details view coming soon!</p>
+        </div>
+    </div>
 
     <script>
         // Initialize sample data and global variables
@@ -1163,6 +1509,9 @@
                         <button class="btn btn-sm btn-secondary" onclick="toggleStrategy(${strategy.id})">
                             <i class="fas fa-${strategy.status === 'running' ? 'pause' : 'play'}"></i>
                         </button>
+                        <button class="btn btn-sm btn-primary" onclick="editStrategy(${strategy.id})">
+                            <i class="fas fa-edit"></i>
+                        </button>
                     </div>
                 </div>
             `).join('');
@@ -1196,6 +1545,11 @@
             showNotification(`Strategy ${strategy.name} ${strategy.status}`, 'success');
         }
 
+        function editStrategy(strategyId) {
+            showNotification(`Opening strategy editor for ID: ${strategyId}`, 'success');
+            showPage('strategy-builder');
+        }
+
         function startAllStrategies() {
             strategies.forEach(strategy => {
                 strategy.status = 'running';
@@ -1212,6 +1566,27 @@
             });
             renderStrategies();
             showNotification('Strategies data refreshed', 'success');
+        }
+
+        // Quick strategy creation
+        function createQuickStrategy(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            
+            const newStrategy = {
+                id: strategies.length + 1,
+                name: formData.get('strategyName') || 'Quick Strategy',
+                status: 'paused',
+                pnl: 0,
+                trades: 0,
+                winRate: 0,
+                capital: parseInt(formData.get('capital')) || 50000
+            };
+
+            strategies.push(newStrategy);
+            renderStrategies();
+            closeModal('quick-strategy-modal');
+            showNotification(`Strategy "${newStrategy.name}" created successfully!`, 'success');
         }
 
         // Navigation functions
@@ -1292,6 +1667,15 @@
             }
         }
 
+        // Modal functions
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
         // Theme functions
         function toggleTheme() {
             document.body.classList.toggle('dark-mode');
@@ -1365,6 +1749,35 @@
             }
         };
 
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey || event.metaKey) {
+                switch(event.key) {
+                    case 's':
+                        event.preventDefault();
+                        showNotification('Settings saved!', 'success');
+                        break;
+                    case 'n':
+                        event.preventDefault();
+                        if (currentPage === 'dashboard') {
+                            showModal('quick-strategy-modal');
+                        }
+                        break;
+                    case 'r':
+                        event.preventDefault();
+                        refreshStrategies();
+                        break;
+                }
+            }
+            
+            // ESC to close modals
+            if (event.key === 'Escape') {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.style.display = 'none';
+                });
+            }
+        });
+
         // Update initialization to use enhanced backend integration
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize app with basic functionality first
@@ -1391,9 +1804,10 @@
 
         // Final initialization log
         console.log('🚀 AlgoTrade Pro - Complete Algorithmic Trading Platform Loaded Successfully!');
-        console.log('✅ Features: Strategy Builder | Backtesting | Live Trading | Portfolio Management');
-        console.log('✅ Features: Risk Management | Market Data | Research Lab | Optimization');
-        console.log('✅ Features: Alerts | Analytics | Paper Trading | Options Trading | Trade Reports');
+        console.log('✅ WORKING: Dashboard | Paper Trading');
+        console.log('⏳ COMING SOON: Strategy Builder | Backtesting | Live Trading | Portfolio Management');
+        console.log('⏳ COMING SOON: Risk Management | Market Data | Research Lab | Optimization');
+        console.log('⏳ COMING SOON: Alerts | Analytics | Options Trading | Trade Reports | Broker Integration | Settings');
         console.log('✅ Ready for trading operations!');
     </script>
 </body>
