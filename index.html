@@ -4994,36 +4994,5 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
-
-<div style="margin-top: 20px; color: white;">
-    🔁 Signal Output: <span id="signal-box">Loading...</span><br>
-    📈 Price Output: <span id="price-box">Loading...</span>
-</div>
-
-
-<script>
-window.addEventListener("DOMContentLoaded", () => {
-    // Call /get-signal
-    fetch("https://alfa-ai-backend.onrender.com/get-signal")
-        .then(res => res.json())
-        .then(data => {
-            console.log("Signal Response:", data);
-            const signalBox = document.getElementById("signal-box");
-            if (signalBox) signalBox.textContent = JSON.stringify(data);
-        })
-        .catch(err => console.error("Signal Error:", err));
-
-    // Call /get-price?symbol=WIPRO
-    fetch("https://alfa-ai-backend.onrender.com/get-price?symbol=WIPRO")
-        .then(res => res.json())
-        .then(data => {
-            console.log("Price Response:", data);
-            const priceBox = document.getElementById("price-box");
-            if (priceBox) priceBox.textContent = `WIPRO: ₹${data.price}`;
-        })
-        .catch(err => console.error("Price Error:", err));
-});
-</script>
-
 </body>
 </html>
