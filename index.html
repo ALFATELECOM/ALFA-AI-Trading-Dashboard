@@ -740,6 +740,30 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a href="#paper-trading" class="nav-link" onclick="showPage('paper-trading')">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Paper Trading</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#options-trading" class="nav-link" onclick="showPage('options-trading')">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Options Trading</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#trade-reports" class="nav-link" onclick="showPage('trade-reports')">
+                            <i class="fas fa-file-invoice"></i>
+                            <span>Trade Reports</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#broker-integration" class="nav-link" onclick="showPage('broker-integration')">
+                            <i class="fas fa-plug"></i>
+                            <span>Broker Integration</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="#settings" class="nav-link" onclick="showPage('settings')">
                             <i class="fas fa-cog"></i>
                             <span>Settings</span>
@@ -1436,80 +1460,286 @@ class MyStrategy(Strategy):
             <!-- Market Data Page -->
             <div id="market-data" class="page">
                 <div class="page-header">
-                    <h1 class="page-title">Market Data & Analysis</h1>
-                    <button class="btn btn-primary" onclick="addToWatchlist()">
-                        <i class="fas fa-plus"></i> Add Symbol
-                    </button>
+                    <h1 class="page-title">Live Market Analysis</h1>
+                    <div>
+                        <span id="market-status" class="status running pulse">MARKET OPEN</span>
+                        <button class="btn btn-primary" onclick="addToWatchlist()">
+                            <i class="fas fa-plus"></i> Add Symbol
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Market Overview -->
+                <!-- Market Overview with Live Updates -->
                 <div class="grid-4">
                     <div class="metric-card">
-                        <div class="metric-value positive">19,845</div>
+                        <div class="metric-value positive" id="nifty-price">19,845</div>
                         <div class="metric-label">NIFTY 50</div>
-                        <div class="metric-change positive">+125 (+0.63%)</div>
+                        <div class="metric-change positive" id="nifty-change">+125 (+0.63%)</div>
+                        <div style="font-size: 0.8rem; color: var(--text-light); margin-top: 5px;">
+                            Support: 19,750 | Resistance: 19,950
+                        </div>
                     </div>
                     <div class="metric-card">
-                        <div class="metric-value negative">45,280</div>
+                        <div class="metric-value negative" id="banknifty-price">45,280</div>
                         <div class="metric-label">BANK NIFTY</div>
-                        <div class="metric-change negative">-89 (-0.20%)</div>
+                        <div class="metric-change negative" id="banknifty-change">-89 (-0.20%)</div>
+                        <div style="font-size: 0.8rem; color: var(--text-light); margin-top: 5px;">
+                            Support: 45,000 | Resistance: 45,500
+                        </div>
                     </div>
                     <div class="metric-card">
-                        <div class="metric-value positive">2,485</div>
-                        <div class="metric-label">RELIANCE</div>
-                        <div class="metric-change positive">+35 (+1.43%)</div>
+                        <div class="metric-value positive" id="sensex-price">66,795</div>
+                        <div class="metric-label">SENSEX</div>
+                        <div class="metric-change positive" id="sensex-change">+234 (+0.35%)</div>
+                        <div style="font-size: 0.8rem; color: var(--text-light); margin-top: 5px;">
+                            Support: 66,500 | Resistance: 67,200
+                        </div>
                     </div>
                     <div class="metric-card">
-                        <div class="metric-value positive">3,695</div>
-                        <div class="metric-label">TCS</div>
-                        <div class="metric-change positive">+15 (+0.41%)</div>
+                        <div class="metric-value" style="color: var(--primary-color);" id="vix-value">14.85</div>
+                        <div class="metric-label">INDIA VIX</div>
+                        <div class="metric-change negative" id="vix-change">-0.45 (-2.94%)</div>
+                        <div style="font-size: 0.8rem; color: var(--text-light); margin-top: 5px;">
+                            Fear & Greed: Neutral
+                        </div>
                     </div>
                 </div>
 
-                <!-- Market Analysis -->
-                <div class="grid-2">
+                <!-- Live Technical Analysis -->
+                <div class="grid-3">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Technical Analysis</h3>
+                            <h3 class="card-title">Live Technical Levels</h3>
+                            <select id="technical-symbol" onchange="updateTechnicalLevels()">
+                                <option value="NIFTY">NIFTY 50</option>
+                                <option value="BANKNIFTY">BANK NIFTY</option>
+                                <option value="SENSEX">SENSEX</option>
+                            </select>
                         </div>
-                        <div class="chart-container">
-                            <i class="fas fa-chart-line" style="font-size: 3rem; margin-bottom: 15px;"></i>
-                            <div>Advanced Charting Tools</div>
+                        <div id="technical-levels">
+                            <div style="margin-bottom: 15px;">
+                                <strong>Trend Analysis:</strong>
+                                <span class="status running" id="trend-status">BULLISH</span>
+                            </div>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Level</th>
+                                        <th>Value</th>
+                                        <th>Type</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="levels-table">
+                                    <tr>
+                                        <td>R3</td>
+                                        <td>20,150</td>
+                                        <td><span style="color: var(--danger-color);">Strong Resistance</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>R2</td>
+                                        <td>19,950</td>
+                                        <td><span style="color: var(--warning-color);">Resistance</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>R1</td>
+                                        <td>19,900</td>
+                                        <td><span style="color: var(--warning-color);">Minor Resistance</span></td>
+                                    </tr>
+                                    <tr style="background: rgba(6, 214, 160, 0.1);">
+                                        <td><strong>CMP</strong></td>
+                                        <td><strong>19,845</strong></td>
+                                        <td><strong>Current Price</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>S1</td>
+                                        <td>19,750</td>
+                                        <td><span style="color: var(--success-color);">Minor Support</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>S2</td>
+                                        <td>19,650</td>
+                                        <td><span style="color: var(--success-color);">Support</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>S3</td>
+                                        <td>19,500</td>
+                                        <td><span style="color: var(--success-color);">Strong Support</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Market Scanner</h3>
+                            <h3 class="card-title">Market Sentiment</h3>
+                        </div>
+                        <div class="grid-2" style="gap: 15px;">
+                            <div class="metric-card">
+                                <div class="metric-value positive">72%</div>
+                                <div class="metric-label">Bullish Sentiment</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value negative">28%</div>
+                                <div class="metric-label">Bearish Sentiment</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <h5>Market Indicators:</h5>
+                            <div style="margin: 10px 0;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>Advances vs Declines:</span>
+                                    <span class="positive">1,456 vs 892</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>New Highs vs Lows:</span>
+                                    <span class="positive">234 vs 45</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>FII Activity:</span>
+                                    <span class="positive">+₹1,250 Cr</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>DII Activity:</span>
+                                    <span class="negative">-₹890 Cr</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Sector Performance</h3>
                         </div>
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th>Symbol</th>
-                                    <th>Signal</th>
-                                    <th>Strength</th>
-                                    <th>Price</th>
-                                    <th>Volume</th>
+                                    <th>Sector</th>
+                                    <th>Change %</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>INFY</td>
-                                    <td><span class="status running">BUY</span></td>
-                                    <td>Strong</td>
-                                    <td>₹1,450</td>
-                                    <td>2.5M</td>
+                                    <td>Banking</td>
+                                    <td class="positive">+1.24%</td>
                                 </tr>
-                                <!-- More signals... -->
+                                <tr>
+                                    <td>IT</td>
+                                    <td class="positive">+0.89%</td>
+                                </tr>
+                                <tr>
+                                    <td>Pharma</td>
+                                    <td class="negative">-0.45%</td>
+                                </tr>
+                                <tr>
+                                    <td>Auto</td>
+                                    <td class="positive">+0.67%</td>
+                                </tr>
+                                <tr>
+                                    <td>Metal</td>
+                                    <td class="negative">-1.23%</td>
+                                </tr>
+                                <tr>
+                                    <td>Energy</td>
+                                    <td class="positive">+0.34%</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Watchlist -->
+                <!-- Advanced Market Analysis -->
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Intraday Chart Analysis</h3>
+                            <div class="tabs" style="width: auto; margin: 0;">
+                                <button class="tab-btn active" onclick="updateMarketChart('1m')">1M</button>
+                                <button class="tab-btn" onclick="updateMarketChart('5m')">5M</button>
+                                <button class="tab-btn" onclick="updateMarketChart('15m')">15M</button>
+                                <button class="tab-btn" onclick="updateMarketChart('1h')">1H</button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <i class="fas fa-chart-candlestick" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                            <div>Live Candlestick Chart with Technical Overlays</div>
+                            <div style="margin-top: 10px; font-size: 0.9rem; color: var(--text-light);">
+                                EMA(20): 19,823 | RSI: 68.5 | MACD: Bullish
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Options Flow Analysis</h3>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <span>Call:Put Ratio:</span>
+                                <strong>1.24</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <span>Max Pain:</span>
+                                <strong>19,800</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <span>PCR:</span>
+                                <strong>0.81</strong>
+                            </div>
+                        </div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Strike</th>
+                                    <th>Call OI</th>
+                                    <th>Put OI</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>19700</td>
+                                    <td>45,250</td>
+                                    <td>89,450</td>
+                                    <td><span class="status running">Support</span></td>
+                                </tr>
+                                <tr>
+                                    <td>19800</td>
+                                    <td>67,890</td>
+                                    <td>156,780</td>
+                                    <td><span class="status running">Strong Support</span></td>
+                                </tr>
+                                <tr style="background: rgba(6, 214, 160, 0.1);">
+                                    <td><strong>19850</strong></td>
+                                    <td><strong>89,340</strong></td>
+                                    <td><strong>78,920</strong></td>
+                                    <td><strong>ATM</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>19900</td>
+                                    <td>123,450</td>
+                                    <td>45,670</td>
+                                    <td><span class="status stopped">Resistance</span></td>
+                                </tr>
+                                <tr>
+                                    <td>20000</td>
+                                    <td>234,560</td>
+                                    <td>23,890</td>
+                                    <td><span class="status stopped">Strong Resistance</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Enhanced Watchlist -->
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Watchlist</h3>
+                        <h3 class="card-title">Smart Watchlist</h3>
+                        <div>
+                            <input type="text" id="add-symbol-input" placeholder="Add symbol (e.g., RELIANCE)" style="padding: 8px; border: 1px solid var(--border-color); border-radius: 5px; margin-right: 10px;">
+                            <button class="btn btn-sm btn-primary" onclick="addSymbolToWatchlist()">Add</button>
+                        </div>
                     </div>
                     <table class="table">
                         <thead>
@@ -1519,15 +1749,1042 @@ class MyStrategy(Strategy):
                                 <th>Change</th>
                                 <th>Volume</th>
                                 <th>RSI</th>
-                                <th>MACD</th>
+                                <th>Support</th>
+                                <th>Resistance</th>
                                 <th>Signal</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="watchlist-table">
-                            <!-- Watchlist items will be populated here -->
+                        <tbody id="enhanced-watchlist-table">
+                            <!-- Enhanced watchlist items will be populated here -->
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <!-- Paper Trading Page -->
+            <div id="paper-trading" class="page">
+                <div class="page-header">
+                    <h1 class="page-title">Paper Trading Environment</h1>
+                    <div>
+                        <span class="status running">📊 SIMULATION MODE</span>
+                        <button class="btn btn-primary" onclick="resetPaperAccount()">
+                            <i class="fas fa-refresh"></i> Reset Account
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Paper Trading Stats -->
+                <div class="grid-4">
+                    <div class="metric-card">
+                        <div class="metric-value" style="color: var(--primary-color);" id="paper-portfolio-value">₹10,45,680</div>
+                        <div class="metric-label">Virtual Portfolio Value</div>
+                        <div class="metric-change positive" id="paper-portfolio-change">+₹45,680 (+4.57%)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="paper-trades-count">156</div>
+                        <div class="metric-label">Total Paper Trades</div>
+                        <div class="metric-change">89 Wins | 67 Loss</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value positive" id="paper-win-rate">57.1%</div>
+                        <div class="metric-label">Win Rate</div>
+                        <div class="metric-change positive">+2.3% this week</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" style="color: var(--accent-color);" id="paper-available-cash">₹2,54,320</div>
+                        <div class="metric-label">Available Cash</div>
+                        <div class="metric-change">25.4% of portfolio</div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <!-- Paper Trading Controls -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Quick Paper Trade</h3>
+                        </div>
+                        <div class="form-group">
+                            <label>Symbol</label>
+                            <input type="text" id="paper-symbol" placeholder="e.g., RELIANCE" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 5px;">
+                        </div>
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>Quantity</label>
+                                <input type="number" id="paper-quantity" value="1" min="1" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 5px;">
+                            </div>
+                            <div class="form-group">
+                                <label>Order Type</label>
+                                <select id="paper-order-type" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 5px;">
+                                    <option value="market">Market</option>
+                                    <option value="limit">Limit</option>
+                                    <option value="sl">Stop Loss</option>
+                                    <option value="sl-m">Stop Loss Market</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group" id="paper-price-group" style="display: none;">
+                            <label>Price</label>
+                            <input type="number" id="paper-price" step="0.01" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 5px;">
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 20px;">
+                            <button class="btn btn-success" onclick="placePaperTrade('BUY')" style="flex: 1;">
+                                <i class="fas fa-arrow-up"></i> Buy
+                            </button>
+                            <button class="btn btn-danger" onclick="placePaperTrade('SELL')" style="flex: 1;">
+                                <i class="fas fa-arrow-down"></i> Sell
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Paper Portfolio Holdings -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Paper Portfolio Holdings</h3>
+                        </div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Symbol</th>
+                                    <th>Qty</th>
+                                    <th>Avg Price</th>
+                                    <th>LTP</th>
+                                    <th>P&L</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paper-holdings-table">
+                                <tr>
+                                    <td><strong>RELIANCE</strong></td>
+                                    <td>50</td>
+                                    <td>₹2,450</td>
+                                    <td>₹2,485</td>
+                                    <td class="positive">+₹1,750</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>TCS</strong></td>
+                                    <td>25</td>
+                                    <td>₹3,680</td>
+                                    <td>₹3,695</td>
+                                    <td class="positive">+₹375</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>INFY</strong></td>
+                                    <td>40</td>
+                                    <td>₹1,420</td>
+                                    <td>₹1,435</td>
+                                    <td class="positive">+₹600</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Paper Trading Performance -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Paper Trading Performance</h3>
+                        <div class="tabs" style="width: auto; margin: 0;">
+                            <button class="tab-btn active" onclick="updatePaperChart('1D')">1D</button>
+                            <button class="tab-btn" onclick="updatePaperChart('1W')">1W</button>
+                            <button class="tab-btn" onclick="updatePaperChart('1M')">1M</button>
+                            <button class="tab-btn" onclick="updatePaperChart('3M')">3M</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <i class="fas fa-chart-line" style="font-size: 3rem; margin-bottom: 15px; color: var(--accent-color);"></i>
+                        <div>Paper Trading Equity Curve</div>
+                        <div style="margin-top: 10px; color: var(--text-light);">
+                            Track your virtual trading performance over time
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Options Trading Page -->
+            <div id="options-trading" class="page">
+                <div class="page-header">
+                    <h1 class="page-title">Options Trading Platform</h1>
+                    <div>
+                        <span id="options-expiry-timer" class="status running">Weekly Expiry: 2d 14h 32m</span>
+                        <button class="btn btn-primary" onclick="showOptionStrategy()">
+                            <i class="fas fa-chess"></i> Strategy Builder
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Options Market Overview -->
+                <div class="grid-4">
+                    <div class="metric-card">
+                        <div class="metric-value">1.24</div>
+                        <div class="metric-label">Call:Put Ratio</div>
+                        <div class="metric-change positive">Bullish Sentiment</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">19,800</div>
+                        <div class="metric-label">Max Pain</div>
+                        <div class="metric-change">50 points below CMP</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value negative">0.81</div>
+                        <div class="metric-label">PCR (OI)</div>
+                        <div class="metric-change">Slightly Bearish</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" style="color: var(--warning-color);">14.85</div>
+                        <div class="metric-label">Implied Volatility</div>
+                        <div class="metric-change negative">-2.3% today</div>
+                    </div>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="showOptionsTab('chain')">Options Chain</button>
+                    <button class="tab-btn" onclick="showOptionsTab('strategies')">Strategies</button>
+                    <button class="tab-btn" onclick="showOptionsTab('greeks')">Greeks Analysis</button>
+                    <button class="tab-btn" onclick="showOptionsTab('scanner')">Options Scanner</button>
+                </div>
+
+                <!-- Options Chain -->
+                <div id="options-chain" class="tab-content active">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">NIFTY Options Chain</h3>
+                            <div>
+                                <select id="options-expiry" onchange="updateOptionsChain()">
+                                    <option value="weekly">28-DEC-2024 (Weekly)</option>
+                                    <option value="monthly">26-JAN-2025 (Monthly)</option>
+                                    <option value="quarterly">27-MAR-2025 (Quarterly)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th colspan="6" style="text-align: center; background: rgba(16, 185, 129, 0.1); color: var(--success-color);">CALL OPTIONS</th>
+                                        <th style="background: var(--light-bg); font-weight: bold;">STRIKE</th>
+                                        <th colspan="6" style="text-align: center; background: rgba(239, 68, 68, 0.1); color: var(--danger-color);">PUT OPTIONS</th>
+                                    </tr>
+                                    <tr>
+                                        <th>OI</th>
+                                        <th>Chng OI</th>
+                                        <th>Volume</th>
+                                        <th>IV</th>
+                                        <th>LTP</th>
+                                        <th>Chng</th>
+                                        <th style="background: var(--light-bg); font-weight: bold;">PRICE</th>
+                                        <th>Chng</th>
+                                        <th>LTP</th>
+                                        <th>IV</th>
+                                        <th>Volume</th>
+                                        <th>Chng OI</th>
+                                        <th>OI</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="options-chain-table">
+                                    <!-- Options chain data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Options Strategies -->
+                <div id="options-strategies" class="tab-content">
+                    <div class="grid-3">
+                        <div class="card">
+                            <h4><i class="fas fa-chart-line"></i> Bull Call Spread</h4>
+                            <p>Moderately bullish strategy with limited risk and reward</p>
+                            <div style="margin: 15px 0;">
+                                <div>Max Profit: ₹2,500</div>
+                                <div>Max Loss: ₹1,500</div>
+                                <div>Breakeven: 19,915</div>
+                            </div>
+                            <button class="btn btn-primary btn-sm" onclick="createStrategy('bull-call-spread')">Create Strategy</button>
+                        </div>
+                        
+                        <div class="card">
+                            <h4><i class="fas fa-shield-alt"></i> Iron Condor</h4>
+                            <p>Market neutral strategy for range-bound markets</p>
+                            <div style="margin: 15px 0;">
+                                <div>Max Profit: ₹3,200</div>
+                                <div>Max Loss: ₹1,800</div>
+                                <div>Range: 19,750 - 19,950</div>
+                            </div>
+                            <button class="btn btn-primary btn-sm" onclick="createStrategy('iron-condor')">Create Strategy</button>
+                        </div>
+                        
+                        <div class="card">
+                            <h4><i class="fas fa-chart-area"></i> Long Straddle</h4>
+                            <p>High volatility strategy for big moves in either direction</p>
+                            <div style="margin: 15px 0;">
+                                <div>Max Profit: Unlimited</div>
+                                <div>Max Loss: ₹4,500</div>
+                                <div>Breakevens: 19,650 & 20,050</div>
+                            </div>
+                            <button class="btn btn-primary btn-sm" onclick="createStrategy('long-straddle')">Create Strategy</button>
+                        </div>
+                    </div>
+
+                    <!-- Active Options Positions -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Active Options Positions</h3>
+                        </div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Strategy</th>
+                                    <th>Strikes</th>
+                                    <th>Type</th>
+                                    <th>Qty</th>
+                                    <th>Premium</th>
+                                    <th>Current Value</th>
+                                    <th>P&L</th>
+                                    <th>Greeks</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Bull Call Spread</td>
+                                    <td>19800/19900</td>
+                                    <td>CE/CE</td>
+                                    <td>50/50</td>
+                                    <td>₹1,750</td>
+                                    <td>₹2,100</td>
+                                    <td class="positive">+₹350</td>
+                                    <td>Δ: 0.35, Θ: -12</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-danger">Close</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Greeks Analysis -->
+                <div id="options-greeks" class="tab-content">
+                    <div class="grid-2">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Portfolio Greeks</h3>
+                            </div>
+                            <div class="grid-2">
+                                <div class="metric-card">
+                                    <div class="metric-value">245.8</div>
+                                    <div class="metric-label">Portfolio Delta</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-value negative">-156.2</div>
+                                    <div class="metric-label">Portfolio Theta</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-value">89.4</div>
+                                    <div class="metric-label">Portfolio Gamma</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-value">1,234</div>
+                                    <div class="metric-label">Portfolio Vega</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Risk Analysis</h3>
+                            </div>
+                            <div class="chart-container" style="height: 200px;">
+                                <i class="fas fa-chart-line" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                                <div>P&L Chart by Underlying Price</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Options Scanner -->
+                <div id="options-scanner" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Options Opportunity Scanner</h3>
+                            <div>
+                                <select id="scanner-filter" onchange="updateOptionsScanner()">
+                                    <option value="high-iv">High IV Options</option>
+                                    <option value="volume-surge">Volume Surge</option>
+                                    <option value="oi-buildup">OI Buildup</option>
+                                    <option value="arbitrage">Arbitrage Opportunities</option>
+                                </select>
+                            </div>
+                        </div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Symbol</th>
+                                    <th>Strike</th>
+                                    <th>Type</th>
+                                    <th>LTP</th>
+                                    <th>IV</th>
+                                    <th>Volume</th>
+                                    <th>OI Change</th>
+                                    <th>Signal</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="options-scanner-table">
+                                <tr>
+                                    <td>NIFTY</td>
+                                    <td>19850</td>
+                                    <td>CE</td>
+                                    <td>45.5</td>
+                                    <td>18.5%</td>
+                                    <td>156,890</td>
+                                    <td class="positive">+45,670</td>
+                                    <td><span class="status running">BUY</span></td>
+                                    <td><button class="btn btn-sm btn-primary">Trade</button></td>
+                                </tr>
+                                <tr>
+                                    <td>BANKNIFTY</td>
+                                    <td>45000</td>
+                                    <td>PE</td>
+                                    <td>89.75</td>
+                                    <td>22.3%</td>
+                                    <td>234,560</td>
+                                    <td class="positive">+67,890</td>
+                                    <td><span class="status running">BUY</span></td>
+                                    <td><button class="btn btn-sm btn-primary">Trade</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trade Reports Page -->
+            <div id="trade-reports" class="page">
+                <div class="page-header">
+                    <h1 class="page-title">Comprehensive Trade Reports</h1>
+                    <div>
+                        <button class="btn btn-secondary" onclick="exportTradeReport()">
+                            <i class="fas fa-download"></i> Export Report
+                        </button>
+                        <button class="btn btn-primary" onclick="generateTaxReport()">
+                            <i class="fas fa-file-invoice-dollar"></i> Tax Report
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Trade Summary -->
+                <div class="grid-4">
+                    <div class="metric-card">
+                        <div class="metric-value positive" id="total-trades-pnl">+₹1,24,580</div>
+                        <div class="metric-label">Total P&L (All Time)</div>
+                        <div class="metric-change positive">+18.7% return</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="total-trades-count">1,456</div>
+                        <div class="metric-label">Total Trades</div>
+                        <div class="metric-change">892 wins | 564 loss</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value positive" id="overall-win-rate">61.3%</div>
+                        <div class="metric-label">Overall Win Rate</div>
+                        <div class="metric-change positive">Above average</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value positive" id="avg-profit">₹2,145</div>
+                        <div class="metric-label">Avg Profit/Trade</div>
+                        <div class="metric-change">Risk:Reward 1:2.1</div>
+                    </div>
+                </div>
+
+                <!-- Trade Filters -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Trade Filters & Analysis</h3>
+                    </div>
+                    <div class="grid-4">
+                        <div class="form-group">
+                            <label>Date Range</label>
+                            <select id="trade-date-filter" onchange="filterTrades()">
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                                <option value="quarter">This Quarter</option>
+                                <option value="year">This Year</option>
+                                <option value="all">All Time</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Asset Type</label>
+                            <select id="trade-type-filter" onchange="filterTrades()">
+                                <option value="all">All Types</option>
+                                <option value="equity">Equity</option>
+                                <option value="options">Options</option>
+                                <option value="futures">Futures</option>
+                                <option value="currency">Currency</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Strategy</label>
+                            <select id="trade-strategy-filter" onchange="filterTrades()">
+                                <option value="all">All Strategies</option>
+                                <option value="momentum">Momentum</option>
+                                <option value="mean-reversion">Mean Reversion</option>
+                                <option value="arbitrage">Arbitrage</option>
+                                <option value="manual">Manual</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Symbol</label>
+                            <input type="text" id="trade-symbol-filter" placeholder="e.g., RELIANCE" onchange="filterTrades()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Trade Log -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Detailed Trade Log</h3>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Trade ID</th>
+                                    <th>Date</th>
+                                    <th>Symbol</th>
+                                    <th>Type</th>
+                                    <th>Side</th>
+                                    <th>Quantity</th>
+                                    <th>Entry Time</th>
+                                    <th>Entry Price</th>
+                                    <th>Exit Time</th>
+                                    <th>Exit Price</th>
+                                    <th>P&L</th>
+                                    <th>P&L %</th>
+                                    <th>Strategy</th>
+                                    <th>Commission</th>
+                                    <th>Net P&L</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detailed-trade-log">
+                                <tr>
+                                    <td>TXN001456</td>
+                                    <td>28-Dec-2024</td>
+                                    <td><strong>RELIANCE</strong></td>
+                                    <td>Equity</td>
+                                    <td><span class="status running">BUY</span></td>
+                                    <td>50</td>
+                                    <td>09:32:15</td>
+                                    <td>₹2,450.00</td>
+                                    <td>14:56:23</td>
+                                    <td>₹2,485.50</td>
+                                    <td class="positive">+₹1,775</td>
+                                    <td class="positive">+1.45%</td>
+                                    <td>Momentum Pro</td>
+                                    <td>₹40</td>
+                                    <td class="positive">+₹1,735</td>
+                                </tr>
+                                <tr>
+                                    <td>TXN001455</td>
+                                    <td>28-Dec-2024</td>
+                                    <td><strong>TCS</strong></td>
+                                    <td>Equity</td>
+                                    <td><span class="status stopped">SELL</span></td>
+                                    <td>25</td>
+                                    <td>10:15:42</td>
+                                    <td>₹3,695.75</td>
+                                    <td>15:23:18</td>
+                                    <td>₹3,680.25</td>
+                                    <td class="negative">-₹387.50</td>
+                                    <td class="negative">-0.42%</td>
+                                    <td>Mean Reversion</td>
+                                    <td>₹40</td>
+                                    <td class="negative">-₹427.50</td>
+                                </tr>
+                                <tr>
+                                    <td>TXN001454</td>
+                                    <td>27-Dec-2024</td>
+                                    <td><strong>NIFTY 19850 CE</strong></td>
+                                    <td>Options</td>
+                                    <td><span class="status running">BUY</span></td>
+                                    <td>100</td>
+                                    <td>11:45:30</td>
+                                    <td>₹45.50</td>
+                                    <td>13:20:45</td>
+                                    <td>₹67.25</td>
+                                    <td class="positive">+₹2,175</td>
+                                    <td class="positive">+47.8%</td>
+                                    <td>Options Scalping</td>
+                                    <td>₹80</td>
+                                    <td class="positive">+₹2,095</td>
+                                </tr>
+                                <tr>
+                                    <td>TXN001453</td>
+                                    <td>27-Dec-2024</td>
+                                    <td><strong>BANKNIFTY</strong></td>
+                                    <td>Futures</td>
+                                    <td><span class="status running">BUY</span></td>
+                                    <td>1</td>
+                                    <td>14:20:10</td>
+                                    <td>₹45,180.50</td>
+                                    <td>15:45:33</td>
+                                    <td>₹45,285.75</td>
+                                    <td class="positive">+₹525</td>
+                                    <td class="positive">+0.23%</td>
+                                    <td>Arbitrage</td>
+                                    <td>₹60</td>
+                                    <td class="positive">+₹465</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Trade Analytics -->
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Performance by Strategy</h3>
+                        </div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Strategy</th>
+                                    <th>Trades</th>
+                                    <th>Win Rate</th>
+                                    <th>Avg P&L</th>
+                                    <th>Total P&L</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Momentum Pro</td>
+                                    <td>456</td>
+                                    <td class="positive">67.3%</td>
+                                    <td class="positive">₹1,890</td>
+                                    <td class="positive">₹86,184</td>
+                                </tr>
+                                <tr>
+                                    <td>Mean Reversion</td>
+                                    <td>289</td>
+                                    <td class="positive">58.1%</td>
+                                    <td class="positive">₹945</td>
+                                    <td class="positive">₹27,311</td>
+                                </tr>
+                                <tr>
+                                    <td>Options Scalping</td>
+                                    <td>234</td>
+                                    <td class="positive">71.8%</td>
+                                    <td class="positive">₹2,456</td>
+                                    <td class="positive">₹57,510</td>
+                                </tr>
+                                <tr>
+                                    <td>Arbitrage</td>
+                                    <td>145</td>
+                                    <td class="positive">89.7%</td>
+                                    <td class="positive">₹678</td>
+                                    <td class="positive">₹9,831</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Monthly P&L Analysis</h3>
+                        </div>
+                        <div class="chart-container">
+                            <i class="fas fa-chart-bar" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                            <div>Monthly P&L Performance Chart</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tax Optimization -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Tax Optimization Analysis</h3>
+                    </div>
+                    <div class="grid-3">
+                        <div class="metric-card">
+                            <div class="metric-value positive">₹89,650</div>
+                            <div class="metric-label">Short Term Gains</div>
+                            <div class="metric-change">Tax: ₹13,448 (15%)</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value positive">₹34,930</div>
+                            <div class="metric-label">Long Term Gains</div>
+                            <div class="metric-change">Tax: ₹3,493 (10%)</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value negative">₹12,450</div>
+                            <div class="metric-label">Losses for Set-off</div>
+                            <div class="metric-change">Available for adjustment</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Broker Integration Page -->
+            <div id="broker-integration" class="page">
+                <div class="page-header">
+                    <h1 class="page-title">Broker API Integration</h1>
+                    <button class="btn btn-primary" onclick="addNewBroker()">
+                        <i class="fas fa-plus"></i> Add Broker
+                    </button>
+                </div>
+
+                <!-- Broker Status Overview -->
+                <div class="grid-4">
+                    <div class="metric-card">
+                        <div class="metric-value" style="color: var(--success-color);">2</div>
+                        <div class="metric-label">Connected Brokers</div>
+                        <div class="metric-change">Active & Synced</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" style="color: var(--primary-color);">₹7,45,680</div>
+                        <div class="metric-label">Total Balance</div>
+                        <div class="metric-change">Across all brokers</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" style="color: var(--accent-color);">45ms</div>
+                        <div class="metric-label">Avg API Latency</div>
+                        <div class="metric-change">Excellent performance</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value positive">99.8%</div>
+                        <div class="metric-label">Uptime</div>
+                        <div class="metric-change">Last 30 days</div>
+                    </div>
+                </div>
+
+                <!-- Zerodha Integration -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-plug"></i> Zerodha Kite Integration</h3>
+                        <div>
+                            <span class="status running" id="zerodha-status">CONNECTED</span>
+                        </div>
+                    </div>
+                    <div class="grid-2">
+                        <div>
+                            <h5>API Configuration</h5>
+                            <div class="form-group">
+                                <label>API Key</label>
+                                <input type="text" id="zerodha-api-key" placeholder="Enter your Zerodha API Key" value="kite_api_key_****">
+                            </div>
+                            <div class="form-group">
+                                <label>API Secret</label>
+                                <input type="password" id="zerodha-api-secret" placeholder="Enter your Zerodha API Secret" value="*****************">
+                            </div>
+                            <div class="form-group">
+                                <label>Request Token</label>
+                                <input type="text" id="zerodha-request-token" placeholder="Request token from login">
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="zerodha-auto-login" checked> 
+                                    Auto-login on startup
+                                </label>
+                            </div>
+                            <button class="btn btn-primary" onclick="connectZerodha()">
+                                <i class="fas fa-link"></i> Connect/Reconnect
+                            </button>
+                            <button class="btn btn-secondary" onclick="testZerodhaConnection()">
+                                <i class="fas fa-check"></i> Test Connection
+                            </button>
+                        </div>
+                        <div>
+                            <h5>Account Information</h5>
+                            <div style="background: var(--light-bg); padding: 20px; border-radius: 10px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                    <span>Client ID:</span>
+                                    <strong id="zerodha-client-id">AB1234</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                    <span>Available Balance:</span>
+                                    <strong id="zerodha-balance" class="positive">₹3,45,680</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                    <span>Utilized Margin:</span>
+                                    <strong id="zerodha-margin">₹1,23,450</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                    <span>Open Positions:</span>
+                                    <strong id="zerodha-positions">8</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                    <span>Last Sync:</span>
+                                    <strong id="zerodha-last-sync">2 mins ago</strong>
+                                </div>
+                            </div>
+                            <button class="btn btn-success" onclick="syncZerodhaData()" style="width: 100%; margin-top: 15px;">
+                                <i class="fas fa-sync"></i> Sync Portfolio Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API Endpoints Configuration -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">API Endpoints & Settings</h3>
+                    </div>
+                    <div class="tabs">
+                        <button class="tab-btn active" onclick="showBrokerTab('endpoints')">Endpoints</button>
+                        <button class="tab-btn" onclick="showBrokerTab('permissions')">Permissions</button>
+                        <button class="tab-btn" onclick="showBrokerTab('limits')">Rate Limits</button>
+                        <button class="tab-btn" onclick="showBrokerTab('logs')">API Logs</button>
+                    </div>
+
+                    <!-- Endpoints Tab -->
+                    <div id="broker-endpoints" class="tab-content active">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Endpoint</th>
+                                    <th>Method</th>
+                                    <th>Purpose</th>
+                                    <th>Status</th>
+                                    <th>Last Called</th>
+                                    <th>Response Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>/orders</td>
+                                    <td>GET</td>
+                                    <td>Fetch orders</td>
+                                    <td><span class="status running">Active</span></td>
+                                    <td>2 mins ago</td>
+                                    <td>45ms</td>
+                                </tr>
+                                <tr>
+                                    <td>/positions</td>
+                                    <td>GET</td>
+                                    <td>Fetch positions</td>
+                                    <td><span class="status running">Active</span></td>
+                                    <td>1 min ago</td>
+                                    <td>38ms</td>
+                                </tr>
+                                <tr>
+                                    <td>/orders</td>
+                                    <td>POST</td>
+                                    <td>Place order</td>
+                                    <td><span class="status running">Active</span></td>
+                                    <td>5 mins ago</td>
+                                    <td>67ms</td>
+                                </tr>
+                                <tr>
+                                    <td>/orders/{order_id}</td>
+                                    <td>PUT</td>
+                                    <td>Modify order</td>
+                                    <td><span class="status running">Active</span></td>
+                                    <td>10 mins ago</td>
+                                    <td>52ms</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Permissions Tab -->
+                    <div id="broker-permissions" class="tab-content">
+                        <div class="grid-2">
+                            <div>
+                                <h5>Trading Permissions</h5>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" checked> Equity Trading
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" checked> Options Trading
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" checked> Futures Trading
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox"> Currency Trading
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox"> Commodity Trading
+                                    </label>
+                                </div>
+                            </div>
+                            <div>
+                                <h5>Data Permissions</h5>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" checked> Live Market Data
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" checked> Historical Data
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" checked> Portfolio Data
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" checked> Order Book Access
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rate Limits Tab -->
+                    <div id="broker-limits" class="tab-content">
+                        <div class="grid-3">
+                            <div class="metric-card">
+                                <div class="metric-value">156</div>
+                                <div class="metric-label">API Calls/Minute</div>
+                                <div class="metric-change">Limit: 300/min</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value">2,340</div>
+                                <div class="metric-label">Daily API Calls</div>
+                                <div class="metric-change">Limit: 100,000/day</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-value">45</div>
+                                <div class="metric-label">Orders/Hour</div>
+                                <div class="metric-change">Limit: 1,000/hour</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- API Logs Tab -->
+                    <div id="broker-logs" class="tab-content">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Endpoint</th>
+                                    <th>Method</th>
+                                    <th>Status</th>
+                                    <th>Response Time</th>
+                                    <th>Message</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>14:32:15</td>
+                                    <td>/orders</td>
+                                    <td>POST</td>
+                                    <td><span class="status running">200</span></td>
+                                    <td>67ms</td>
+                                    <td>Order placed successfully</td>
+                                </tr>
+                                <tr>
+                                    <td>14:31:45</td>
+                                    <td>/positions</td>
+                                    <td>GET</td>
+                                    <td><span class="status running">200</span></td>
+                                    <td>38ms</td>
+                                    <td>Positions fetched</td>
+                                </tr>
+                                <tr>
+                                    <td>14:31:20</td>
+                                    <td>/orders</td>
+                                    <td>GET</td>
+                                    <td><span class="status running">200</span></td>
+                                    <td>45ms</td>
+                                    <td>Orders list retrieved</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Portfolio Sync Status -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Portfolio Synchronization</h3>
+                        <button class="btn btn-primary" onclick="forcePortfolioSync()">
+                            <i class="fas fa-sync"></i> Force Sync
+                        </button>
+                    </div>
+                    <div class="grid-2">
+                        <div>
+                            <h5>Sync Status</h5>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Data Type</th>
+                                        <th>Last Sync</th>
+                                        <th>Status</th>
+                                        <th>Records</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Holdings</td>
+                                        <td>2 mins ago</td>
+                                        <td><span class="status running">Synced</span></td>
+                                        <td>23</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Orders</td>
+                                        <td>1 min ago</td>
+                                        <td><span class="status running">Synced</span></td>
+                                        <td>156</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Positions</td>
+                                        <td>30 sec ago</td>
+                                        <td><span class="status running">Synced</span></td>
+                                        <td>8</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Funds</td>
+                                        <td>1 min ago</td>
+                                        <td><span class="status running">Synced</span></td>
+                                        <td>1</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div>
+                            <h5>Auto-Sync Settings</h5>
+                            <div class="form-group">
+                                <label>Portfolio Sync Interval</label>
+                                <select>
+                                    <option>Real-time</option>
+                                    <option selected>Every 30 seconds</option>
+                                    <option>Every minute</option>
+                                    <option>Every 5 minutes</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" checked> Sync on trade execution
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" checked> Sync on order modification
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox"> Sync during market hours only
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -2189,6 +3446,7 @@ class MyStrategy(Strategy):
     <script>
         // Global application state
         let currentPage = 'dashboard';
+        let tradingMode = 'live'; // 'live' or 'paper'
         let strategies = [
             {
                 id: 1,
@@ -2242,12 +3500,118 @@ class MyStrategy(Strategy):
             }
         ];
 
+        // Paper trading state
+        let paperPortfolio = {
+            value: 1045680,
+            cash: 254320,
+            trades: 156,
+            winRate: 57.1,
+            holdings: [
+                { symbol: 'RELIANCE', qty: 50, avgPrice: 2450, current: 2485 },
+                { symbol: 'TCS', qty: 25, avgPrice: 3680, current: 3695 },
+                { symbol: 'INFY', qty: 40, avgPrice: 1420, current: 1435 }
+            ]
+        };
+
+        // Market data state
+        let marketData = {
+            nifty: { price: 19845, change: 125, changePercent: 0.63, support: 19750, resistance: 19950 },
+            banknifty: { price: 45280, change: -89, changePercent: -0.20, support: 45000, resistance: 45500 },
+            sensex: { price: 66795, change: 234, changePercent: 0.35, support: 66500, resistance: 67200 },
+            vix: { price: 14.85, change: -0.45, changePercent: -2.94 }
+        };
+
+        // Zerodha API state
+        let zerodhaAPI = {
+            connected: false,
+            apiKey: '',
+            apiSecret: '',
+            accessToken: '',
+            clientId: 'AB1234',
+            balance: 345680,
+            margin: 123450,
+            positions: 8,
+            lastSync: new Date()
+        };
+
+        // Options chain data
+        let optionsChain = [
+            {
+                strike: 19700,
+                call: { oi: 45250, volume: 12340, iv: 16.5, ltp: 85.5, change: 5.25 },
+                put: { oi: 89450, volume: 23450, iv: 18.2, ltp: 35.75, change: -2.15 }
+            },
+            {
+                strike: 19800,
+                call: { oi: 67890, volume: 34560, iv: 15.8, ltp: 55.25, change: 3.75 },
+                put: { oi: 156780, volume: 45670, iv: 17.5, ltp: 55.50, change: 1.25 }
+            },
+            {
+                strike: 19850,
+                call: { oi: 89340, volume: 56780, iv: 15.2, ltp: 35.75, change: 2.25 },
+                put: { oi: 78920, volume: 34560, iv: 16.8, ltp: 75.25, change: 3.50 }
+            },
+            {
+                strike: 19900,
+                call: { oi: 123450, volume: 67890, iv: 14.8, ltp: 22.50, change: 1.75 },
+                put: { oi: 45670, volume: 23450, iv: 16.2, ltp: 98.75, change: 5.25 }
+            },
+            {
+                strike: 20000,
+                call: { oi: 234560, volume: 89340, iv: 14.2, ltp: 8.75, change: 0.50 },
+                put: { oi: 23890, volume: 12340, iv: 15.5, ltp: 155.50, change: 8.75 }
+            }
+        ];
+
+        // Detailed trade log
+        let detailedTrades = [
+            {
+                id: 'TXN001456',
+                date: '28-Dec-2024',
+                symbol: 'RELIANCE',
+                type: 'Equity',
+                side: 'BUY',
+                quantity: 50,
+                entryTime: '09:32:15',
+                entryPrice: 2450.00,
+                exitTime: '14:56:23',
+                exitPrice: 2485.50,
+                pnl: 1775,
+                pnlPercent: 1.45,
+                strategy: 'Momentum Pro',
+                commission: 40,
+                netPnl: 1735
+            },
+            {
+                id: 'TXN001455',
+                date: '28-Dec-2024',
+                symbol: 'TCS',
+                type: 'Equity',
+                side: 'SELL',
+                quantity: 25,
+                entryTime: '10:15:42',
+                entryPrice: 3695.75,
+                exitTime: '15:23:18',
+                exitPrice: 3680.25,
+                pnl: -387.50,
+                pnlPercent: -0.42,
+                strategy: 'Mean Reversion',
+                commission: 40,
+                netPnl: -427.50
+            }
+        ];
+
         // Initialize application
         document.addEventListener('DOMContentLoaded', function() {
             initializeApp();
             renderStrategies();
             renderTrades();
             startRealTimeUpdates();
+            initializeMarketData();
+            renderOptionsChain();
+            renderDetailedTradeLog();
+            renderEnhancedWatchlist();
+            updateMarketStatus();
         });
 
         function initializeApp() {
@@ -2258,8 +3622,601 @@ class MyStrategy(Strategy):
                 document.querySelector('.theme-toggle i').className = 'fas fa-sun';
             }
 
+            // Check trading mode
+            const savedMode = localStorage.getItem('tradingMode');
+            if (savedMode) {
+                tradingMode = savedMode;
+            }
+
+            // Initialize paper trading mode listeners
+            document.getElementById('paper-order-type')?.addEventListener('change', function() {
+                const priceGroup = document.getElementById('paper-price-group');
+                if (this.value === 'limit' || this.value === 'sl') {
+                    priceGroup.style.display = 'block';
+                } else {
+                    priceGroup.style.display = 'none';
+                }
+            });
+
             // Show welcome notification
-            showNotification('AlgoTrade Pro loaded successfully!', 'success');
+            showNotification('AlgoTrade Pro with Advanced Features loaded successfully!', 'success');
+        }
+
+        // Market Data Functions
+        function updateMarketStatus() {
+            const now = new Date();
+            const hour = now.getHours();
+            const minute = now.getMinutes();
+            const currentTime = hour * 60 + minute;
+            
+            const marketOpen = 9 * 60 + 15; // 9:15 AM
+            const marketClose = 15 * 60 + 30; // 3:30 PM
+            
+            const statusElement = document.getElementById('market-status');
+            if (currentTime >= marketOpen && currentTime <= marketClose) {
+                statusElement.textContent = 'MARKET OPEN';
+                statusElement.className = 'status running pulse';
+            } else {
+                statusElement.textContent = 'MARKET CLOSED';
+                statusElement.className = 'status stopped';
+            }
+        }
+
+        function updateTechnicalLevels() {
+            const symbol = document.getElementById('technical-symbol').value;
+            const levelsTable = document.getElementById('levels-table');
+            const trendStatus = document.getElementById('trend-status');
+            
+            // Simulate different levels for different symbols
+            let levels = [];
+            let trend = 'BULLISH';
+            
+            switch(symbol) {
+                case 'NIFTY':
+                    levels = [
+                        { level: 'R3', value: 20150, type: 'Strong Resistance' },
+                        { level: 'R2', value: 19950, type: 'Resistance' },
+                        { level: 'R1', value: 19900, type: 'Minor Resistance' },
+                        { level: 'CMP', value: 19845, type: 'Current Price' },
+                        { level: 'S1', value: 19750, type: 'Minor Support' },
+                        { level: 'S2', value: 19650, type: 'Support' },
+                        { level: 'S3', value: 19500, type: 'Strong Support' }
+                    ];
+                    break;
+                case 'BANKNIFTY':
+                    levels = [
+                        { level: 'R3', value: 45800, type: 'Strong Resistance' },
+                        { level: 'R2', value: 45500, type: 'Resistance' },
+                        { level: 'R1', value: 45350, type: 'Minor Resistance' },
+                        { level: 'CMP', value: 45280, type: 'Current Price' },
+                        { level: 'S1', value: 45000, type: 'Minor Support' },
+                        { level: 'S2', value: 44750, type: 'Support' },
+                        { level: 'S3', value: 44500, type: 'Strong Support' }
+                    ];
+                    trend = 'BEARISH';
+                    break;
+                case 'SENSEX':
+                    levels = [
+                        { level: 'R3', value: 67500, type: 'Strong Resistance' },
+                        { level: 'R2', value: 67200, type: 'Resistance' },
+                        { level: 'R1', value: 67000, type: 'Minor Resistance' },
+                        { level: 'CMP', value: 66795, type: 'Current Price' },
+                        { level: 'S1', value: 66500, type: 'Minor Support' },
+                        { level: 'S2', value: 66200, type: 'Support' },
+                        { level: 'S3', value: 66000, type: 'Strong Support' }
+                    ];
+                    break;
+            }
+            
+            trendStatus.textContent = trend;
+            trendStatus.className = trend === 'BULLISH' ? 'status running' : 'status stopped';
+            
+            levelsTable.innerHTML = levels.map(level => {
+                const colorClass = level.type.includes('Resistance') ? 'var(--danger-color)' : 
+                                 level.type.includes('Support') ? 'var(--success-color)' : 
+                                 'var(--primary-color)';
+                
+                const bgColor = level.level === 'CMP' ? 'rgba(6, 214, 160, 0.1)' : '';
+                
+                return `
+                    <tr style="background: ${bgColor};">
+                        <td>${level.level === 'CMP' ? '<strong>CMP</strong>' : level.level}</td>
+                        <td>${level.level === 'CMP' ? '<strong>' + level.value + '</strong>' : level.value}</td>
+                        <td><span style="color: ${colorClass};">${level.type}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateMarketChart(timeframe) {
+            // Update chart timeframe buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            showNotification(`Market chart updated to ${timeframe} timeframe`, 'success');
+        }
+
+        function renderEnhancedWatchlist() {
+            const container = document.getElementById('enhanced-watchlist-table');
+            if (!container) return;
+
+            const watchlist = [
+                { symbol: 'RELIANCE', ltp: 2485, change: 35, volume: 2500000, rsi: 68, support: 2450, resistance: 2520, signal: 'BUY' },
+                { symbol: 'TCS', ltp: 3695, change: 15, volume: 1800000, rsi: 45, support: 3650, resistance: 3720, signal: 'HOLD' },
+                { symbol: 'INFY', ltp: 1435, change: -12, volume: 3200000, rsi: 72, support: 1420, resistance: 1450, signal: 'SELL' },
+                { symbol: 'HDFC BANK', ltp: 1680, change: -8, volume: 2100000, rsi: 38, support: 1650, resistance: 1695, signal: 'BUY' },
+                { symbol: 'ICICI BANK', ltp: 985, change: 12, volume: 4500000, rsi: 55, support: 970, resistance: 1000, signal: 'HOLD' }
+            ];
+
+            container.innerHTML = watchlist.map(item => `
+                <tr>
+                    <td><strong>${item.symbol}</strong></td>
+                    <td>₹${item.ltp}</td>
+                    <td class="${item.change >= 0 ? 'positive' : 'negative'}">${item.change >= 0 ? '+' : ''}₹${item.change}</td>
+                    <td>${(item.volume / 1000000).toFixed(1)}M</td>
+                    <td>${item.rsi}</td>
+                    <td>₹${item.support}</td>
+                    <td>₹${item.resistance}</td>
+                    <td><span class="status ${item.signal === 'BUY' ? 'running' : item.signal === 'SELL' ? 'stopped' : 'paused'}">${item.signal}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="quickTrade('${item.symbol}')">Trade</button>
+                        <button class="btn btn-sm btn-secondary" onclick="addAlert('${item.symbol}')">Alert</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function addSymbolToWatchlist() {
+            const input = document.getElementById('add-symbol-input');
+            const symbol = input.value.trim().toUpperCase();
+            
+            if (symbol) {
+                showNotification(`${symbol} added to watchlist`, 'success');
+                input.value = '';
+                renderEnhancedWatchlist();
+            }
+        }
+
+        // Paper Trading Functions
+        function placePaperTrade(side) {
+            const symbol = document.getElementById('paper-symbol').value.trim().toUpperCase();
+            const quantity = parseInt(document.getElementById('paper-quantity').value);
+            const orderType = document.getElementById('paper-order-type').value;
+            const price = parseFloat(document.getElementById('paper-price').value) || 0;
+
+            if (!symbol || quantity <= 0) {
+                showNotification('Please enter valid symbol and quantity', 'error');
+                return;
+            }
+
+            // Simulate order placement
+            const currentPrice = Math.floor(Math.random() * 1000) + 1000; // Random price for demo
+            const executionPrice = orderType === 'market' ? currentPrice : price;
+            
+            showNotification(`📊 Paper ${side} order placed for ${quantity} ${symbol} at ₹${executionPrice}`, 'success');
+            
+            // Update paper portfolio
+            paperPortfolio.trades++;
+            const tradeValue = quantity * executionPrice;
+            
+            if (side === 'BUY') {
+                paperPortfolio.cash -= tradeValue;
+                // Add to holdings
+                const existingHolding = paperPortfolio.holdings.find(h => h.symbol === symbol);
+                if (existingHolding) {
+                    const totalQty = existingHolding.qty + quantity;
+                    existingHolding.avgPrice = ((existingHolding.avgPrice * existingHolding.qty) + tradeValue) / totalQty;
+                    existingHolding.qty = totalQty;
+                } else {
+                    paperPortfolio.holdings.push({
+                        symbol: symbol,
+                        qty: quantity,
+                        avgPrice: executionPrice,
+                        current: executionPrice
+                    });
+                }
+            } else {
+                paperPortfolio.cash += tradeValue;
+                // Remove from holdings
+                const existingHolding = paperPortfolio.holdings.find(h => h.symbol === symbol);
+                if (existingHolding) {
+                    existingHolding.qty -= quantity;
+                    if (existingHolding.qty <= 0) {
+                        paperPortfolio.holdings = paperPortfolio.holdings.filter(h => h.symbol !== symbol);
+                    }
+                }
+            }
+            
+            updatePaperPortfolioDisplay();
+            renderPaperHoldings();
+            
+            // Clear form
+            document.getElementById('paper-symbol').value = '';
+            document.getElementById('paper-quantity').value = '1';
+        }
+
+        function updatePaperPortfolioDisplay() {
+            document.getElementById('paper-portfolio-value').textContent = `₹${paperPortfolio.value.toLocaleString()}`;
+            document.getElementById('paper-trades-count').textContent = paperPortfolio.trades;
+            document.getElementById('paper-available-cash').textContent = `₹${paperPortfolio.cash.toLocaleString()}`;
+            document.getElementById('paper-win-rate').textContent = `${paperPortfolio.winRate}%`;
+        }
+
+        function renderPaperHoldings() {
+            const container = document.getElementById('paper-holdings-table');
+            if (!container) return;
+
+            container.innerHTML = paperPortfolio.holdings.map(holding => {
+                const pnl = (holding.current - holding.avgPrice) * holding.qty;
+                return `
+                    <tr>
+                        <td><strong>${holding.symbol}</strong></td>
+                        <td>${holding.qty}</td>
+                        <td>₹${holding.avgPrice}</td>
+                        <td>₹${holding.current}</td>
+                        <td class="${pnl >= 0 ? 'positive' : 'negative'}">${pnl >= 0 ? '+' : ''}₹${Math.abs(pnl).toFixed(0)}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function resetPaperAccount() {
+            if (confirm('Are you sure you want to reset your paper trading account? This will clear all positions and reset to ₹10,00,000.')) {
+                paperPortfolio = {
+                    value: 1000000,
+                    cash: 1000000,
+                    trades: 0,
+                    winRate: 0,
+                    holdings: []
+                };
+                updatePaperPortfolioDisplay();
+                renderPaperHoldings();
+                showNotification('📊 Paper trading account reset successfully!', 'success');
+            }
+        }
+
+        function updatePaperChart(timeframe) {
+            // Update chart timeframe buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            showNotification(`Paper trading chart updated to ${timeframe} view`, 'success');
+        }
+
+        // Options Trading Functions
+        function showOptionsTab(tabName) {
+            document.querySelectorAll('#options-trading .tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('#options-trading .tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById('options-' + tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function renderOptionsChain() {
+            const container = document.getElementById('options-chain-table');
+            if (!container) return;
+
+            container.innerHTML = optionsChain.map(option => `
+                <tr style="${option.strike === 19850 ? 'background: rgba(6, 214, 160, 0.1);' : ''}">
+                    <td>${option.call.oi.toLocaleString()}</td>
+                    <td class="${option.call.change >= 0 ? 'positive' : 'negative'}">${option.call.change >= 0 ? '+' : ''}${option.call.oi > 100000 ? Math.floor(option.call.oi / 1000) + 'K' : option.call.oi}</td>
+                    <td>${(option.call.volume / 1000).toFixed(0)}K</td>
+                    <td>${option.call.iv}%</td>
+                    <td>₹${option.call.ltp}</td>
+                    <td class="${option.call.change >= 0 ? 'positive' : 'negative'}">${option.call.change >= 0 ? '+' : ''}₹${option.call.change}</td>
+                    <td style="background: var(--light-bg); font-weight: bold; text-align: center;">${option.strike}</td>
+                    <td class="${option.put.change >= 0 ? 'positive' : 'negative'}">${option.put.change >= 0 ? '+' : ''}₹${option.put.change}</td>
+                    <td>₹${option.put.ltp}</td>
+                    <td>${option.put.iv}%</td>
+                    <td>${(option.put.volume / 1000).toFixed(0)}K</td>
+                    <td class="${option.put.change >= 0 ? 'positive' : 'negative'}">${option.put.change >= 0 ? '+' : ''}${option.put.oi > 100000 ? Math.floor(option.put.oi / 1000) + 'K' : option.put.oi}</td>
+                    <td>${option.put.oi.toLocaleString()}</td>
+                </tr>
+            `).join('');
+        }
+
+        function updateOptionsChain() {
+            const expiry = document.getElementById('options-expiry').value;
+            showNotification(`Options chain updated for ${expiry} expiry`, 'success');
+            // Simulate different data for different expiries
+            renderOptionsChain();
+        }
+
+        function createStrategy(strategyType) {
+            showNotification(`Creating ${strategyType} options strategy...`, 'warning');
+            setTimeout(() => {
+                showNotification(`${strategyType} strategy created successfully!`, 'success');
+            }, 2000);
+        }
+
+        function showOptionStrategy() {
+            showNotification('Options strategy builder would open here', 'success');
+        }
+
+        function updateOptionsScanner() {
+            const filter = document.getElementById('scanner-filter').value;
+            showNotification(`Options scanner updated with ${filter} filter`, 'success');
+        }
+
+        // Trade Reports Functions
+        function renderDetailedTradeLog() {
+            const container = document.getElementById('detailed-trade-log');
+            if (!container) return;
+
+            container.innerHTML = detailedTrades.map(trade => `
+                <tr>
+                    <td>${trade.id}</td>
+                    <td>${trade.date}</td>
+                    <td><strong>${trade.symbol}</strong></td>
+                    <td>${trade.type}</td>
+                    <td><span class="status ${trade.side === 'BUY' ? 'running' : 'stopped'}">${trade.side}</span></td>
+                    <td>${trade.quantity}</td>
+                    <td>${trade.entryTime}</td>
+                    <td>₹${trade.entryPrice.toFixed(2)}</td>
+                    <td>${trade.exitTime}</td>
+                    <td>₹${trade.exitPrice.toFixed(2)}</td>
+                    <td class="${trade.pnl >= 0 ? 'positive' : 'negative'}">${trade.pnl >= 0 ? '+' : ''}₹${trade.pnl}</td>
+                    <td class="${trade.pnlPercent >= 0 ? 'positive' : 'negative'}">${trade.pnlPercent >= 0 ? '+' : ''}${trade.pnlPercent}%</td>
+                    <td>${trade.strategy}</td>
+                    <td>₹${trade.commission}</td>
+                    <td class="${trade.netPnl >= 0 ? 'positive' : 'negative'}">${trade.netPnl >= 0 ? '+' : ''}₹${trade.netPnl}</td>
+                </tr>
+            `).join('');
+        }
+
+        function filterTrades() {
+            const dateFilter = document.getElementById('trade-date-filter').value;
+            const typeFilter = document.getElementById('trade-type-filter').value;
+            const strategyFilter = document.getElementById('trade-strategy-filter').value;
+            const symbolFilter = document.getElementById('trade-symbol-filter').value.toUpperCase();
+
+            showNotification(`Trades filtered by: ${dateFilter}, ${typeFilter}, ${strategyFilter}${symbolFilter ? ', ' + symbolFilter : ''}`, 'success');
+            
+            // Simulate filtering
+            renderDetailedTradeLog();
+        }
+
+        function exportTradeReport() {
+            const data = {
+                trades: detailedTrades,
+                summary: {
+                    totalTrades: detailedTrades.length,
+                    totalPnl: detailedTrades.reduce((sum, trade) => sum + trade.netPnl, 0),
+                    winRate: (detailedTrades.filter(trade => trade.netPnl > 0).length / detailedTrades.length * 100).toFixed(1)
+                },
+                timestamp: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `trade_report_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('Trade report exported successfully!', 'success');
+        }
+
+        function generateTaxReport() {
+            showNotification('Generating comprehensive tax report...', 'warning');
+            setTimeout(() => {
+                showNotification('Tax report generated with STCG, LTCG, and loss details!', 'success');
+            }, 3000);
+        }
+
+        // Broker Integration Functions
+        function showBrokerTab(tabName) {
+            document.querySelectorAll('#broker-integration .tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('#broker-integration .tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById('broker-' + tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function connectZerodha() {
+            const apiKey = document.getElementById('zerodha-api-key').value;
+            const apiSecret = document.getElementById('zerodha-api-secret').value;
+            const requestToken = document.getElementById('zerodha-request-token').value;
+
+            if (!apiKey || !apiSecret) {
+                showNotification('Please enter API Key and Secret', 'error');
+                return;
+            }
+
+            showNotification('Connecting to Zerodha Kite API...', 'warning');
+            
+            // Simulate API connection
+            setTimeout(() => {
+                zerodhaAPI.connected = true;
+                zerodhaAPI.apiKey = apiKey;
+                zerodhaAPI.apiSecret = apiSecret;
+                zerodhaAPI.lastSync = new Date();
+                
+                document.getElementById('zerodha-status').textContent = 'CONNECTED';
+                document.getElementById('zerodha-status').className = 'status running';
+                
+                showNotification('Zerodha API connected successfully!', 'success');
+                updateZerodhaDisplay();
+            }, 3000);
+        }
+
+        function testZerodhaConnection() {
+            if (!zerodhaAPI.connected) {
+                showNotification('Please connect to Zerodha first', 'error');
+                return;
+            }
+
+            showNotification('Testing Zerodha API connection...', 'warning');
+            
+            setTimeout(() => {
+                const success = Math.random() > 0.1; // 90% success rate
+                if (success) {
+                    showNotification('API connection test successful!', 'success');
+                } else {
+                    showNotification('API connection test failed. Please check credentials.', 'error');
+                }
+            }, 2000);
+        }
+
+        function syncZerodhaData() {
+            if (!zerodhaAPI.connected) {
+                showNotification('Please connect to Zerodha first', 'error');
+                return;
+            }
+
+            showNotification('Syncing portfolio data from Zerodha...', 'warning');
+            
+            setTimeout(() => {
+                zerodhaAPI.lastSync = new Date();
+                zerodhaAPI.balance = Math.floor(Math.random() * 100000) + 300000;
+                zerodhaAPI.margin = Math.floor(Math.random() * 50000) + 100000;
+                zerodhaAPI.positions = Math.floor(Math.random() * 10) + 5;
+                
+                updateZerodhaDisplay();
+                showNotification('Portfolio data synced successfully!', 'success');
+            }, 2500);
+        }
+
+        function updateZerodhaDisplay() {
+            document.getElementById('zerodha-balance').textContent = `₹${zerodhaAPI.balance.toLocaleString()}`;
+            document.getElementById('zerodha-margin').textContent = `₹${zerodhaAPI.margin.toLocaleString()}`;
+            document.getElementById('zerodha-positions').textContent = zerodhaAPI.positions;
+            document.getElementById('zerodha-last-sync').textContent = getTimeAgo(zerodhaAPI.lastSync);
+        }
+
+        function forcePortfolioSync() {
+            showNotification('Force syncing all broker data...', 'warning');
+            setTimeout(() => {
+                showNotification('All portfolio data synchronized successfully!', 'success');
+            }, 3000);
+        }
+
+        function addNewBroker() {
+            showNotification('Add broker form would open here', 'success');
+        }
+
+        // Utility Functions
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
+            
+            const diffHours = Math.floor(diffMins / 60);
+            if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+            
+            const diffDays = Math.floor(diffHours / 24);
+            return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+        }
+
+        // Real-time market data updates
+        function startMarketDataUpdates() {
+            setInterval(() => {
+                updateRealTimeMarketData();
+            }, 2000); // Update every 2 seconds during market hours
+        }
+
+        function updateRealTimeMarketData() {
+            // Update NIFTY
+            const niftyChange = (Math.random() - 0.5) * 10;
+            marketData.nifty.price += niftyChange;
+            marketData.nifty.change += niftyChange;
+            marketData.nifty.changePercent = (marketData.nifty.change / (marketData.nifty.price - marketData.nifty.change)) * 100;
+            
+            // Update Bank NIFTY
+            const bankNiftyChange = (Math.random() - 0.5) * 25;
+            marketData.banknifty.price += bankNiftyChange;
+            marketData.banknifty.change += bankNiftyChange;
+            marketData.banknifty.changePercent = (marketData.banknifty.change / (marketData.banknifty.price - marketData.banknifty.change)) * 100;
+            
+            // Update SENSEX
+            const sensexChange = (Math.random() - 0.5) * 30;
+            marketData.sensex.price += sensexChange;
+            marketData.sensex.change += sensexChange;
+            marketData.sensex.changePercent = (marketData.sensex.change / (marketData.sensex.price - marketData.sensex.change)) * 100;
+            
+            // Update VIX
+            const vixChange = (Math.random() - 0.5) * 0.5;
+            marketData.vix.price += vixChange;
+            marketData.vix.change += vixChange;
+            marketData.vix.changePercent = (marketData.vix.change / (marketData.vix.price - marketData.vix.change)) * 100;
+            
+            // Update display
+            updateMarketDataDisplay();
+        }
+
+        function updateMarketDataDisplay() {
+            // Update NIFTY
+            const niftyPrice = document.getElementById('nifty-price');
+            const niftyChange = document.getElementById('nifty-change');
+            if (niftyPrice && niftyChange) {
+                niftyPrice.textContent = Math.round(marketData.nifty.price);
+                niftyPrice.className = `metric-value ${marketData.nifty.change >= 0 ? 'positive' : 'negative'}`;
+                niftyChange.textContent = `${marketData.nifty.change >= 0 ? '+' : ''}${Math.round(marketData.nifty.change)} (${marketData.nifty.changePercent >= 0 ? '+' : ''}${marketData.nifty.changePercent.toFixed(2)}%)`;
+                niftyChange.className = `metric-change ${marketData.nifty.change >= 0 ? 'positive' : 'negative'}`;
+            }
+            
+            // Update Bank NIFTY
+            const bankNiftyPrice = document.getElementById('banknifty-price');
+            const bankNiftyChange = document.getElementById('banknifty-change');
+            if (bankNiftyPrice && bankNiftyChange) {
+                bankNiftyPrice.textContent = Math.round(marketData.banknifty.price);
+                bankNiftyPrice.className = `metric-value ${marketData.banknifty.change >= 0 ? 'positive' : 'negative'}`;
+                bankNiftyChange.textContent = `${marketData.banknifty.change >= 0 ? '+' : ''}${Math.round(marketData.banknifty.change)} (${marketData.banknifty.changePercent >= 0 ? '+' : ''}${marketData.banknifty.changePercent.toFixed(2)}%)`;
+                bankNiftyChange.className = `metric-change ${marketData.banknifty.change >= 0 ? 'positive' : 'negative'}`;
+            }
+            
+            // Update SENSEX
+            const sensexPrice = document.getElementById('sensex-price');
+            const sensexChange = document.getElementById('sensex-change');
+            if (sensexPrice && sensexChange) {
+                sensexPrice.textContent = Math.round(marketData.sensex.price);
+                sensexPrice.className = `metric-value ${marketData.sensex.change >= 0 ? 'positive' : 'negative'}`;
+                sensexChange.textContent = `${marketData.sensex.change >= 0 ? '+' : ''}${Math.round(marketData.sensex.change)} (${marketData.sensex.changePercent >= 0 ? '+' : ''}${marketData.sensex.changePercent.toFixed(2)}%)`;
+                sensexChange.className = `metric-change ${marketData.sensex.change >= 0 ? 'positive' : 'negative'}`;
+            }
+            
+            // Update VIX
+            const vixValue = document.getElementById('vix-value');
+            const vixChange = document.getElementById('vix-change');
+            if (vixValue && vixChange) {
+                vixValue.textContent = marketData.vix.price.toFixed(2);
+                vixChange.textContent = `${marketData.vix.change >= 0 ? '+' : ''}${marketData.vix.change.toFixed(2)} (${marketData.vix.changePercent >= 0 ? '+' : ''}${marketData.vix.changePercent.toFixed(2)}%)`;
+                vixChange.className = `metric-change ${marketData.vix.change >= 0 ? 'positive' : 'negative'}`;
+            }
+        }
+
+        // Start all real-time updates
+        function startRealTimeUpdates() {
+            setInterval(() => {
+                updateRealTimeData();
+                if (currentPage === 'market-data') {
+                    startMarketDataUpdates();
+                }
+                updateMarketStatus();
+            }, 5000); // Update every 5 seconds
+            
+            // Start market data updates immediately if on market-data page
+            if (currentPage === 'market-data') {
+                startMarketDataUpdates();
+            }
         }
 
         // Navigation functions
