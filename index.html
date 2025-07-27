@@ -4969,5 +4969,30 @@ class MyStrategy(Strategy):
         console.log('🚀 AlgoTrade Pro - Complete Algorithmic Trading Platform Loaded Successfully!');
         console.log('Features: Strategy Builder | Backtesting | Live Trading | Portfolio Management | Risk Management | Market Data | Research Lab | Optimization | Alerts | Analytics');
     </script>
+
+<script>
+window.addEventListener("DOMContentLoaded", () => {
+    fetch("https://alfa-ai-backend.onrender.com/status")
+        .then(response => response.json())
+        .then(data => {
+            console.log("Backend Response:", data);
+            const statusEl = document.getElementById("system-status");
+            if (statusEl && data.status === "ok") {
+                statusEl.textContent = "BACKEND CONNECTED";
+                statusEl.classList.add("running");
+            }
+        })
+        .catch(error => {
+            console.error("Backend Error:", error);
+            const statusEl = document.getElementById("system-status");
+            if (statusEl) {
+                statusEl.textContent = "BACKEND OFFLINE";
+                statusEl.classList.remove("running");
+                statusEl.classList.add("stopped");
+            }
+        });
+});
+</script>
+
 </body>
 </html>
